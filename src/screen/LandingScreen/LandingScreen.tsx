@@ -1,3 +1,4 @@
+import {StackNavigationProp} from '@react-navigation/stack';
 import {
   ImageBackground,
   StyleSheet,
@@ -6,11 +7,16 @@ import {
   View,
 } from 'react-native';
 
-const LandingScreen = () => {
-  function handlePress() {
-    return null;
-  }
+type RootStackParamList = {
+  Landing: undefined;
+  Login: undefined;
+};
 
+type LandingProps = {
+  navigation: StackNavigationProp<RootStackParamList, 'Login'>;
+};
+
+const LandingScreen: React.FC<LandingProps> = ({navigation}) => {
   return (
     <View style={styles.container}>
       <ImageBackground
@@ -27,7 +33,7 @@ const LandingScreen = () => {
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={styles.button}
-              onPress={handlePress}
+              onPress={() => navigation.navigate('Login')}
               activeOpacity={0.8}>
               <Text style={styles.buttonText}>Start Now</Text>
             </TouchableOpacity>
