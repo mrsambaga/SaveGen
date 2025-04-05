@@ -4,6 +4,7 @@ import {SafeAreaView, StyleSheet} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import RegisterScreen from './screen/RegisterScreen/RegisterScreen';
+import HomeScreen from './screen/HomeScreen/HomeScreen';
 
 const Stack = createStackNavigator();
 
@@ -21,6 +22,11 @@ const App: React.FC = () => {
             name="Register"
             component={RegisterScreen}
             options={{title: 'Register', headerShown: false}}
+          />
+          <Stack.Screen
+            name="Home"
+            component={HomeScreen}
+            options={{title: 'Home', headerShown: false}}
           />
         </Stack.Navigator>
       </NavigationContainer>
