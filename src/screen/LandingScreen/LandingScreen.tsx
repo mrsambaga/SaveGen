@@ -4,11 +4,11 @@ import Button from '../../components/Button';
 
 type RootStackParamList = {
   Landing: undefined;
-  Login: undefined;
+  Register: undefined;
 };
 
 type LandingProps = {
-  navigation: StackNavigationProp<RootStackParamList, 'Login'>;
+  navigation: StackNavigationProp<RootStackParamList, 'Register'>;
 };
 
 const LandingScreen: React.FC<LandingProps> = ({navigation}) => {
@@ -28,7 +28,7 @@ const LandingScreen: React.FC<LandingProps> = ({navigation}) => {
           <View style={styles.buttonContainer}>
             <Button
               title="Start Now"
-              onPress={() => navigation.navigate('Login')}
+              onPress={() => navigation.navigate('Register')}
               buttonStyle={styles.button}
               textStyle={styles.buttonText}
             />

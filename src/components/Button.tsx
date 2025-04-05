@@ -13,6 +13,7 @@ type ButtonProps = {
   buttonStyle?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
   activeOpacity?: number;
+  children?: React.ReactNode;
 };
 
 const Button: React.FC<ButtonProps> = ({
@@ -21,18 +22,27 @@ const Button: React.FC<ButtonProps> = ({
   buttonStyle,
   textStyle,
   activeOpacity = 0.8,
+  children,
 }) => {
   return (
     <TouchableOpacity
       style={[styles.button, buttonStyle]}
       onPress={onPress}
       activeOpacity={activeOpacity}>
-      <Text style={[styles.buttonText, textStyle]}>{title}</Text>
+      {children ? (
+        children
+      ) : (
+        <Text style={[styles.buttonText, textStyle]}>{title}</Text>
+      )}
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
+  icon: {
+    width: '10%',
+    height: '10%',
+  },
   button: {
     backgroundColor: '#201c5c',
     paddingVertical: 10,
