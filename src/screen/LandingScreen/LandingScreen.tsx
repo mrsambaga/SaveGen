@@ -1,11 +1,6 @@
 import {StackNavigationProp} from '@react-navigation/stack';
-import {
-  ImageBackground,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {ImageBackground, StyleSheet, Text, View} from 'react-native';
+import Button from '../../components/Button';
 
 type RootStackParamList = {
   Landing: undefined;
@@ -31,12 +26,12 @@ const LandingScreen: React.FC<LandingProps> = ({navigation}) => {
             </Text>
           </View>
           <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={styles.button}
+            <Button
+              title="Start Now"
               onPress={() => navigation.navigate('Login')}
-              activeOpacity={0.8}>
-              <Text style={styles.buttonText}>Start Now</Text>
-            </TouchableOpacity>
+              buttonStyle={styles.button}
+              textStyle={styles.buttonText}
+            />
           </View>
         </View>
       </ImageBackground>
