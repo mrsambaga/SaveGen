@@ -7,11 +7,12 @@ import Button from '../../components/Button';
 
 type RootStackParamList = {
   Landing: undefined;
-  Login: undefined;
+  Register: undefined;
+  Home: undefined;
 };
 
 type LoginProps = {
-  navigation: StackNavigationProp<RootStackParamList, 'Login'>;
+  navigation: StackNavigationProp<RootStackParamList, 'Home'>;
 };
 
 const RegisterScreen: React.FC<LoginProps> = ({navigation}) => {
@@ -45,15 +46,16 @@ const RegisterScreen: React.FC<LoginProps> = ({navigation}) => {
                 secureTextEntry={true}
               />
               <Button
+                buttonStyle={styles.button}
                 title="Sign up"
-                onPress={() => navigation.navigate('Login')}
+                onPress={() => navigation.navigate('Home')}
               />
             </View>
             <Divider text="or continue with" />
             <View style={styles.buttonContainer}>
               <Button
                 title="Sing in with Google"
-                onPress={() => navigation.navigate('Login')}
+                onPress={() => navigation.navigate('Landing')}
                 buttonStyle={styles.googleButtonContainer}>
                 <View style={styles.googleIconContainer}>
                   <Image
@@ -69,7 +71,7 @@ const RegisterScreen: React.FC<LoginProps> = ({navigation}) => {
               </Button>
               <Button
                 title="Sing in with Facebook"
-                onPress={() => navigation.navigate('Login')}
+                onPress={() => navigation.navigate('Home')}
                 buttonStyle={styles.facebookButtonContainer}>
                 <View style={styles.facebookIconContainer}>
                   <Image
@@ -85,7 +87,7 @@ const RegisterScreen: React.FC<LoginProps> = ({navigation}) => {
               </Button>
               <Button
                 title="Login with email"
-                onPress={() => navigation.navigate('Login')}
+                onPress={() => navigation.navigate('Home')}
                 buttonStyle={styles.mailButtonContainer}>
                 <View style={styles.mailIconContainer}>
                   <Image
@@ -133,6 +135,10 @@ const styles = StyleSheet.create({
     marginTop: '25%',
     paddingHorizontal: '5%',
   },
+  button: {
+    paddingVertical: 10,
+    borderRadius: 15,
+  },
   buttonContainer: {
     gap: 15,
     marginTop: 30,
@@ -170,6 +176,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 30,
     backgroundColor: '#3783fb',
+    paddingVertical: 10,
+    borderRadius: 15,
   },
   googleIconContainer: {
     padding: 2,
@@ -180,6 +188,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 30,
     backgroundColor: '#3b5999',
+    paddingVertical: 10,
+    borderRadius: 15,
   },
   facebookIconContainer: {
     padding: 2,
@@ -191,6 +201,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 30,
     backgroundColor: '#12c48a',
+    paddingVertical: 10,
+    borderRadius: 15,
   },
   mailIconContainer: {
     padding: 2,
