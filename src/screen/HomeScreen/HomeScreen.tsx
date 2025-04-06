@@ -158,8 +158,8 @@ const styles = StyleSheet.create({
   },
   budgetingIcon: {
     marginTop: -10,
-    width: '27%',
-    height: '80%',
+    width: 80,
+    height: 80,
     marginLeft: '15%',
   },
   buttonText: {
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   button: {
-    marginTop: 48,
+    marginTop: '10%',
     backgroundColor: '#8290ed',
     paddingVertical: 10,
     borderRadius: 15,
@@ -199,8 +199,8 @@ const styles = StyleSheet.create({
   },
   eyeIcon: {
     marginLeft: 30,
-    width: 43,
-    height: 25,
+    width: 35,
+    height: 20,
   },
 });
 
