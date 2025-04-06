@@ -9,10 +9,11 @@ type RootStackParamList = {
   Landing: undefined;
   Register: undefined;
   Home: undefined;
+  MainTabs: undefined;
 };
 
 type LoginProps = {
-  navigation: StackNavigationProp<RootStackParamList, 'Home'>;
+  navigation: StackNavigationProp<RootStackParamList, 'MainTabs'>;
 };
 
 const RegisterScreen: React.FC<LoginProps> = ({navigation}) => {
@@ -48,7 +49,7 @@ const RegisterScreen: React.FC<LoginProps> = ({navigation}) => {
               <Button
                 buttonStyle={styles.button}
                 title="Sign up"
-                onPress={() => navigation.navigate('Home')}
+                onPress={() => navigation.navigate('MainTabs')}
               />
             </View>
             <Divider text="or continue with" />
