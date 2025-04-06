@@ -36,17 +36,37 @@ const HomeScreen: React.FC<HomeProps> = ({navigation}) => {
           <View style={[styles.spendingBar, {flex: incomeRatio}]} />
         </View>
       </View>
+      <View style={styles.wallet}>
+        <Image
+          source={require('../../../assets/icons/wallet.png')}
+          style={styles.walletIcon}
+        />
+        <View style={styles.walletRight}>
+          <Text style={styles.heading2}>Cash Wallet</Text>
+          <Text style={styles.heading}>IDR 30.000.000</Text>
+        </View>
+        <Image
+          source={require('../../../assets/icons/eye.png')}
+          style={styles.eyeIcon}
+        />
+      </View>
       <View style={styles.budgetingContainer}>
         <Text style={styles.heading}>Budgeting</Text>
         <View style={styles.budgeting}>
           <Text style={styles.heading}>Set your budget</Text>
-          <Text>Save more money by setting budget</Text>
-          <Button
-            title="Setup now"
-            buttonStyle={styles.button}
-            textStyle={styles.buttonText}
-            onPress={() => navigation.navigate('Register')}
-          />
+          <Text style={styles.text}>Save more money</Text>
+          <View style={styles.budgetingBottom}>
+            <Button
+              title="Setup now"
+              buttonStyle={styles.button}
+              textStyle={styles.buttonText}
+              onPress={() => navigation.navigate('Register')}
+            />
+            <Image
+              source={require('../../../assets/icons/budgeting.png')}
+              style={styles.budgetingIcon}
+            />
+          </View>
         </View>
       </View>
     </View>
@@ -102,7 +122,12 @@ const styles = StyleSheet.create({
   },
   heading2: {
     fontSize: 20,
-    fontFamily: 'Montserrat-Bold',
+    fontFamily: 'Montserrat-Semibold',
+    color: '#201c5c',
+  },
+  text: {
+    fontSize: 16,
+    fontFamily: 'Montserrat',
     color: '#201c5c',
   },
   cardText: {
@@ -128,6 +153,15 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#CCCCCC',
   },
+  budgetingBottom: {
+    flexDirection: 'row',
+  },
+  budgetingIcon: {
+    marginTop: -10,
+    width: '27%',
+    height: '80%',
+    marginLeft: '15%',
+  },
   buttonText: {
     fontSize: 20,
     fontFamily: 'Montserrat-SemiBold',
@@ -143,6 +177,30 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     width: '50%',
+  },
+  wallet: {
+    flexDirection: 'row',
+    padding: 20,
+    marginTop: 20,
+    height: '15%',
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: '#CCCCCC',
+    alignItems: 'center',
+  },
+  walletIcon: {
+    width: '15%',
+    height: '60%',
+  },
+  walletRight: {
+    marginLeft: '5%',
+    paddingTop: 10,
+  },
+  eyeIcon: {
+    marginLeft: 30,
+    width: '12%',
+    height: '25%',
   },
 });
 
