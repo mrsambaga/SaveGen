@@ -199,8 +199,8 @@ const styles = StyleSheet.create({
   },
   eyeIcon: {
     marginLeft: 30,
-    width: '12%',
-    height: '25%',
+    width: 43,
+    height: 25,
   },
 });
 
