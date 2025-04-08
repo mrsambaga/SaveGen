@@ -1,7 +1,408 @@
-import {Text} from 'react-native';
+import React, {useState} from 'react';
+import {View, Text, StyleSheet, FlatList, Image} from 'react-native';
+import {faPieChart} from '@fortawesome/free-solid-svg-icons';
+import {LineChart} from 'react-native-chart-kit';
+import {Dimensions} from 'react-native';
+import Button from '../../components/Button';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 
-const CashflowScreen: React.FC = () => {
-  return <Text>Hello</Text>;
+const screenWidth = Dimensions.get('window').width;
+
+type RootStackParamList = {
+  Overview: undefined;
 };
+
+type CashflowProps = {
+  navigation: StackNavigationProp<RootStackParamList, 'Overview'>;
+};
+
+const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
+  const [chartData] = useState({
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    datasets: [
+      {
+        data: [2500, 2800, 3000, 3000, 3500, 3800],
+        color: (opacity = 1) => `rgba(46, 204, 113, ${opacity})`,
+        strokeWidth: 2,
+      },
+      {
+        data: [1800, 2200, 2400, 2100, 2600, 2900],
+        color: (opacity = 1) => `rgba(231, 76, 60, ${opacity})`,
+        strokeWidth: 2,
+      },
+    ],
+    legend: ['Income', 'Spending'],
+  });
+
+  const [transactions] = useState([
+    {
+      id: '1',
+      date: '2025-04-07',
+      description: 'Salary',
+      amount: 3800,
+      type: 'income',
+    },
+    {
+      id: '2',
+      date: '2025-04-05',
+      description: 'Groceries',
+      amount: -120,
+      type: 'expense',
+    },
+    {
+      id: '3',
+      date: '2025-04-04',
+      description: 'Rent',
+      amount: -1200,
+      type: 'expense',
+    },
+    {
+      id: '4',
+      date: '2025-04-03',
+      description: 'Freelance Work',
+      amount: 350,
+      type: 'income',
+    },
+    {
+      id: '5',
+      date: '2025-04-01',
+      description: 'Utilities',
+      amount: -180,
+      type: 'expense',
+    },
+    {
+      id: '6',
+      date: '2025-03-30',
+      description: 'Restaurant',
+      amount: -75,
+      type: 'expense',
+    },
+    {
+      id: '7',
+      date: '2025-03-28',
+      description: 'Side Project',
+      amount: 200,
+      type: 'income',
+    },
+  ]);
+
+  const balance = transactions.reduce(
+    (sum, transaction) => sum + transaction.amount,
+    0,
+  );
+
+  const income = transactions
+    .filter(transaction => transaction.amount > 0)
+    .reduce((sum, transaction) => sum + transaction.amount, 0);
+
+  const expenses = transactions
+    .filter(transaction => transaction.amount < 0)
+    .reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0);
+
+  const renderTransactionItem = ({item}) => (
+    <View style={styles.transactionItem}>
+      <View>
+        <Image
+          source={require('../../../assets/icons/wallet.png')}
+          style={styles.transactionIcon}
+        />
+      </View>
+      <View style={styles.transactionLeft}>
+        <Text style={styles.transactionDescription}>{item.description}</Text>
+        <Text style={styles.transactionDate}>{formatDate(item.date)}</Text>
+      </View>
+      <Text
+        style={[
+          styles.transactionAmount,
+          item.amount > 0 ? styles.incomeText : styles.expenseText,
+        ]}>
+        {item.amount > 0 ? '+' : ''}
+        {item.amount.toFixed(2)}
+      </Text>
+    </View>
+  );
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  };
+
+  const chartConfig = {
+    backgroundGradientFrom: '#fff',
+    backgroundGradientTo: '#fff',
+    decimalPlaces: 0,
+    color: (opacity = 1) => `rgba(19, 13, 91, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(32, 28, 92, ${opacity})`,
+    style: {
+      borderRadius: 16,
+    },
+    propsForDots: {
+      r: '5',
+      strokeWidth: '2',
+    },
+  };
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.summaryContainer}>
+        <View style={styles.balanceContainer}>
+          <Text style={styles.balanceLabel}>Current Balance</Text>
+          <Text style={styles.balanceAmount}>IDR {balance.toFixed(2)}</Text>
+        </View>
+        <View style={styles.summaryDetails}>
+          <View style={styles.summaryItem}>
+            <Text style={styles.summaryLabel}>Income</Text>
+            <Text style={[styles.summaryAmount, styles.incomeText]}>
+              +${income.toFixed(2)}
+            </Text>
+          </View>
+          <View style={styles.summaryItem}>
+            <Text style={styles.summaryLabel}>Expenses</Text>
+            <Text style={[styles.summaryAmount, styles.expenseText]}>
+              -${expenses.toFixed(2)}
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.chartContainer}>
+        <View style={styles.chartHeader}>
+          <Text style={styles.chartTitle}>Income vs Spending</Text>
+        </View>
+        <LineChart
+          data={chartData}
+          width={screenWidth - 40}
+          height={220}
+          chartConfig={chartConfig}
+          bezier
+          style={styles.chart}
+          fromZero
+          legend={chartData.legend}
+        />
+        <View style={styles.overviewSection}>
+          <Button
+            title="Overview"
+            onPress={() => navigation.navigate('Overview')}
+            buttonStyle={styles.buttonOverviewContainer}>
+            <View style={styles.overviewIconContainer}>
+              <FontAwesomeIcon icon={faPieChart} size={20} color={'#ffffff'} />
+            </View>
+            <View style={styles.overviewTextContainer}>
+              <Text style={styles.overviewText}>Overview</Text>
+            </View>
+          </Button>
+        </View>
+      </View>
+
+      <View style={styles.transactionContainer}>
+        <Text style={styles.sectionTitle}>Recent Transactions</Text>
+        <FlatList
+          data={transactions}
+          renderItem={renderTransactionItem}
+          keyExtractor={item => item.id}
+          showsVerticalScrollIndicator={false}
+          style={styles.transactionList}
+        />
+      </View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+    paddingTop: 15,
+  },
+  summaryContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    margin: 15,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  balanceContainer: {
+    marginBottom: 10,
+  },
+  balanceLabel: {
+    fontSize: 17,
+    color: '#201c5c',
+    fontFamily: 'Montserrat-SemiBold',
+  },
+  balanceAmount: {
+    fontSize: 25,
+    fontFamily: 'Montserrat-Bold',
+    color: '#000',
+  },
+  summaryDetails: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    paddingTop: 10,
+  },
+  summaryItem: {
+    alignItems: 'flex-start',
+  },
+  summaryLabel: {
+    fontSize: 14,
+    color: '#201c5c',
+    fontFamily: 'Montserrat-SemiBold',
+  },
+  summaryAmount: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  incomeText: {
+    color: '#2ecc71',
+    fontFamily: 'Montserrat-SemiBold',
+  },
+  expenseText: {
+    color: '#e74c3c',
+    fontFamily: 'Montserrat-SemiBold',
+  },
+  chartContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    margin: 15,
+    marginTop: 0,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  chartHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  chartTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Montserrat-SemiBold',
+    color: '#201c5c',
+  },
+  timeSelector: {
+    flexDirection: 'row',
+    backgroundColor: '#f0f0f0',
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  timeButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  activeTimeButton: {
+    backgroundColor: '#007AFF',
+  },
+  timeButtonText: {
+    color: '#555',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  activeTimeButtonText: {
+    color: '#fff',
+  },
+  chart: {
+    marginVertical: 8,
+    borderRadius: 16,
+  },
+  transactionContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    margin: 15,
+    marginTop: 0,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 15,
+    fontFamily: 'Montserrat-SemiBold',
+    color: '#201c5c',
+  },
+  transactionList: {
+    flex: 1,
+  },
+  transactionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  transactionIcon: {
+    width: 30,
+    height: 30,
+  },
+  transactionLeft: {
+    flex: 1,
+    marginLeft: 20,
+  },
+  transactionDate: {
+    fontSize: 12,
+    color: '#888',
+    marginBottom: 4,
+  },
+  transactionDescription: {
+    fontSize: 18,
+    fontWeight: '500',
+    fontFamily: 'Montserrat-SemiBold',
+    color: '#201c5c',
+  },
+  transactionAmount: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  overviewSection: {
+    alignItems: 'center',
+  },
+  buttonOverviewContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 30,
+    backgroundColor: '#201c5c',
+    paddingVertical: 10,
+    borderRadius: 15,
+    width: '50%',
+  },
+  overviewIconContainer: {
+    padding: 2,
+    borderRadius: 40,
+    marginRight: 10,
+  },
+  overviewIcon: {
+    width: 15,
+    height: 17,
+  },
+  overviewTextContainer: {
+    textAlign: 'center',
+    justifyContent: 'center',
+    alignContent: 'center',
+    width: '100%',
+  },
+  overviewText: {
+    fontSize: 14,
+    fontFamily: 'Montserrat-SemiBold',
+    color: '#ffffff',
+  },
+});
 
 export default CashflowScreen;
