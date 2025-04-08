@@ -148,7 +148,6 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
           bezier
           style={styles.chart}
           fromZero
-          legend={chartData.legend}
         />
         <View style={styles.overviewSection}>
           <Button
