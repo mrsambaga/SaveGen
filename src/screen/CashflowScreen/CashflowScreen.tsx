@@ -87,19 +87,6 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
     },
   ]);
 
-  const balance = transactions.reduce(
-    (sum, transaction) => sum + transaction.amount,
-    0,
-  );
-
-  const income = transactions
-    .filter(transaction => transaction.amount > 0)
-    .reduce((sum, transaction) => sum + transaction.amount, 0);
-
-  const expenses = transactions
-    .filter(transaction => transaction.amount < 0)
-    .reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0);
-
   const renderTransactionItem = ({item}) => (
     <View style={styles.transactionItem}>
       <View>
@@ -149,27 +136,6 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.summaryContainer}>
-        <View style={styles.balanceContainer}>
-          <Text style={styles.balanceLabel}>Current Balance</Text>
-          <Text style={styles.balanceAmount}>IDR {balance.toFixed(2)}</Text>
-        </View>
-        <View style={styles.summaryDetails}>
-          <View style={styles.summaryItem}>
-            <Text style={styles.summaryLabel}>Income</Text>
-            <Text style={[styles.summaryAmount, styles.incomeText]}>
-              +${income.toFixed(2)}
-            </Text>
-          </View>
-          <View style={styles.summaryItem}>
-            <Text style={styles.summaryLabel}>Expenses</Text>
-            <Text style={[styles.summaryAmount, styles.expenseText]}>
-              -${expenses.toFixed(2)}
-            </Text>
-          </View>
-        </View>
-      </View>
-
       <View style={styles.chartContainer}>
         <View style={styles.chartHeader}>
           <Text style={styles.chartTitle}>Income vs Spending</Text>
@@ -218,49 +184,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
     paddingTop: 15,
-  },
-  summaryContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    margin: 15,
-    padding: 15,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  balanceContainer: {
-    marginBottom: 10,
-  },
-  balanceLabel: {
-    fontSize: 17,
-    color: '#201c5c',
-    fontFamily: 'Montserrat-SemiBold',
-  },
-  balanceAmount: {
-    fontSize: 25,
-    fontFamily: 'Montserrat-Bold',
-    color: '#000',
-  },
-  summaryDetails: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    paddingTop: 10,
-  },
-  summaryItem: {
-    alignItems: 'flex-start',
-  },
-  summaryLabel: {
-    fontSize: 14,
-    color: '#201c5c',
-    fontFamily: 'Montserrat-SemiBold',
-  },
-  summaryAmount: {
-    fontSize: 16,
-    fontWeight: '600',
   },
   incomeText: {
     color: '#2ecc71',
