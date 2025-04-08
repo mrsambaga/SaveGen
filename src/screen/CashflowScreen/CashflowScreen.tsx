@@ -35,7 +35,15 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
     legend: ['Income', 'Spending'],
   });
 
-  const [transactions] = useState([
+  type Transaction = {
+    id: string;
+    date: string;
+    description: string;
+    amount: number;
+    type: string;
+  };
+
+  const [transactions] = useState<Transaction[]>([
     {
       id: '1',
       date: '2025-04-07',
@@ -87,7 +95,7 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
     },
   ]);
 
-  const renderTransactionItem = ({item}) => (
+  const renderTransactionItem = ({item}: {item: Transaction}) => (
     <View style={styles.transactionItem}>
       <View>
         <Image
