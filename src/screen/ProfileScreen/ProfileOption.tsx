@@ -2,13 +2,11 @@ import {StyleSheet, Text, View} from 'react-native';
 import {Image} from 'react-native';
 
 type ProfileOptionProps = {
-  imageUri?: string | null;
   size?: number;
   textColor?: string;
 };
 
 const ProfileOption: React.FC<ProfileOptionProps> = ({
-  imageUri,
   size = 180,
   textColor = '#201c5c',
 }) => {
