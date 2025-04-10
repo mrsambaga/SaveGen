@@ -3,7 +3,6 @@ import {ImageBackground, StyleSheet, Text, View} from 'react-native';
 import Button from '../../components/Button';
 
 type RootStackParamList = {
-  Landing: undefined;
   Register: undefined;
 };
 

@@ -7,8 +7,6 @@ import Button from '../../components/Button';
 
 type RootStackParamList = {
   Landing: undefined;
-  Register: undefined;
-  Home: undefined;
   MainTabs: undefined;
 };
 
@@ -72,7 +70,7 @@ const RegisterScreen: React.FC<LoginProps> = ({navigation}) => {
               </Button>
               <Button
                 title="Sing in with Facebook"
-                onPress={() => navigation.navigate('Home')}
+                onPress={() => navigation.navigate('MainTabs')}
                 buttonStyle={styles.facebookButtonContainer}>
                 <View style={styles.facebookIconContainer}>
                   <Image
@@ -88,7 +86,7 @@ const RegisterScreen: React.FC<LoginProps> = ({navigation}) => {
               </Button>
               <Button
                 title="Login with email"
-                onPress={() => navigation.navigate('Home')}
+                onPress={() => navigation.navigate('MainTabs')}
                 buttonStyle={styles.mailButtonContainer}>
                 <View style={styles.mailIconContainer}>
                   <Image
