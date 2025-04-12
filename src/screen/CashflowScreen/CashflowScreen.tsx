@@ -10,11 +10,23 @@ import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 const screenWidth = Dimensions.get('window').width;
 
 type RootStackParamList = {
-  Overview: undefined;
+  CashFlow: undefined;
+  Overview: {
+    transactions: Transaction[];
+  };
+};
+
+type Transaction = {
+  id: string;
+  date: string;
+  description: string;
+  amount: number;
+  type: string;
+  category: string;
 };
 
 type CashflowProps = {
-  navigation: StackNavigationProp<RootStackParamList, 'Overview'>;
+  navigation: StackNavigationProp<RootStackParamList, 'CashFlow'>;
 };
 
 const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
@@ -35,14 +47,6 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
     legend: ['Income', 'Spending'],
   });
 
-  type Transaction = {
-    id: string;
-    date: string;
-    description: string;
-    amount: number;
-    type: string;
-  };
-
   const [transactions] = useState<Transaction[]>([
     {
       id: '1',
@@ -50,13 +54,15 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
       description: 'Salary',
       amount: 3800,
       type: 'income',
+      category: 'Salary',
     },
     {
       id: '2',
       date: '2025-04-05',
-      description: 'Groceries',
+      description: 'Bread & Cheese',
       amount: -120,
       type: 'expense',
+      category: 'Groceries',
     },
     {
       id: '3',
@@ -64,6 +70,7 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
       description: 'Rent',
       amount: -1200,
       type: 'expense',
+      category: 'Rent',
     },
     {
       id: '4',
@@ -71,6 +78,7 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
       description: 'Freelance Work',
       amount: 350,
       type: 'income',
+      category: 'Salary',
     },
     {
       id: '5',
@@ -78,6 +86,7 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
       description: 'Utilities',
       amount: -180,
       type: 'expense',
+      category: 'Bill',
     },
     {
       id: '6',
@@ -85,6 +94,7 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
       description: 'Restaurant',
       amount: -75,
       type: 'expense',
+      category: 'Food & Drink',
     },
     {
       id: '7',
@@ -92,6 +102,7 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
       description: 'Side Project',
       amount: 200,
       type: 'income',
+      category: 'Salary',
     },
   ]);
 
@@ -160,7 +171,7 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
         <View style={styles.overviewSection}>
           <Button
             title="Overview"
-            onPress={() => navigation.navigate('Overview')}
+            onPress={() => navigation.navigate('Overview', {transactions})}
             buttonStyle={styles.buttonOverviewContainer}>
             <View style={styles.overviewIconContainer}>
               <FontAwesomeIcon icon={faPieChart} size={20} color={'#ffffff'} />
