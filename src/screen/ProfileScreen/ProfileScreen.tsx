@@ -1,6 +1,7 @@
 import {ImageBackground, StyleSheet, Text, View} from 'react-native';
 import {useState} from 'react';
 import ProfileImage from './ProfileImage';
+import SettingsSection from './SettingsSection';
 
 const ProfileScreen: React.FC = () => {
   const [userProfileImage] = useState<string | null>(null);
@@ -28,6 +29,8 @@ const ProfileScreen: React.FC = () => {
             </View>
             <Text style={styles.userName}>{userName}</Text>
             <Text style={styles.email}>{email}</Text>
+
+            <SettingsSection />
           </View>
         </View>
       </ImageBackground>
@@ -114,6 +117,9 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat',
     color: '#201c5c',
     opacity: 0.7,
+  },
+  settings: {
+    flex: 1,
   },
 });
 
