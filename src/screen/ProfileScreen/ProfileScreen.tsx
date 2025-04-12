@@ -1,4 +1,10 @@
-import {ImageBackground, StyleSheet, Text, View} from 'react-native';
+import {
+  ImageBackground,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {useState} from 'react';
 import ProfileImage from './ProfileImage';
 import SettingsSection from './SettingsSection';
@@ -9,7 +15,7 @@ const ProfileScreen: React.FC = () => {
   const email = 'sam.wilson@gmail.com';
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <ImageBackground
         style={styles.backgroundImage}
         source={require('../../../assets/ui/background1.png')}
@@ -34,7 +40,7 @@ const ProfileScreen: React.FC = () => {
           </View>
         </View>
       </ImageBackground>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -79,7 +85,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: '5%',
     backgroundColor: '#ffffff',
     height: '100%',
-    borderRadius: 30,
+    borderTopRightRadius: 30,
+    borderTopLeftRadius: 30,
   },
   title: {
     fontSize: 45,
