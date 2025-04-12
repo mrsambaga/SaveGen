@@ -10,8 +10,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 import HomeScreen from '../screen/HomeScreen/HomeScreen';
-import CashflowScreen from '../screen/CashflowScreen/CashflowScreen';
 import ProfileScreen from '../screen/ProfileScreen/ProfileScreen';
+import CashFlowNavigation from './CashFlowNavigation';
 
 const Tab = createBottomTabNavigator();
 
@@ -64,7 +64,7 @@ const TabNavigation = () => {
       />
       <Tab.Screen
         name="CashFlow"
-        component={CashflowScreen}
+        component={CashFlowNavigation}
         options={tabScreenOptions.cashFlowScreen}
       />
       <Tab.Screen
