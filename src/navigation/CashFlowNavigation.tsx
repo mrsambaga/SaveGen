@@ -17,7 +17,19 @@ const CashFlowNavigation: React.FC = () => {
       <Stack.Screen
         name="Overview"
         component={OverviewSection}
-        options={{title: 'Overview'}}
+        options={{
+          title: 'Overview',
+          headerStyle: {
+            backgroundColor: '#201c5c',
+            elevation: 0,
+            shadowOpacity: 0,
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontFamily: 'Montserrat-SemiBold',
+            fontSize: 22,
+          },
+        }}
       />
     </Stack.Navigator>
   );
