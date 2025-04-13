@@ -3,6 +3,7 @@ import {View, Text, StyleSheet, Dimensions, ScrollView} from 'react-native';
 import {PieChart} from 'react-native-chart-kit';
 import {ChartDataItem} from '../../constants/types';
 import {OverviewProps} from '../../constants/props';
+import CategoryIcons from '../../components/CategoryIcons';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -19,7 +20,7 @@ const OverviewScreen: React.FC<OverviewProps> = ({route}) => {
     const categoryTotals = expenseTransactions.reduce<Record<string, number>>(
       (acc, transaction) => {
         const category = transaction.category;
-        const amount = Math.abs(transaction.amount); // Make the amount positive
+        const amount = Math.abs(transaction.amount);
 
         if (!acc[category]) {
           acc[category] = amount;
@@ -47,7 +48,7 @@ const OverviewScreen: React.FC<OverviewProps> = ({route}) => {
         name,
         amount,
         color: colors[index % colors.length],
-        legendFontColor: '#7F7F7F',
+        legendFontColor: '#201c5c',
         legendFontSize: 12,
       };
     });
@@ -60,11 +61,20 @@ const OverviewScreen: React.FC<OverviewProps> = ({route}) => {
   const chartConfig = {
     backgroundGradientFrom: '#fff',
     backgroundGradientTo: '#fff',
-    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+    color: (opacity = 1) => `rgba(32, 28, 92, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(32, 28, 92, ${opacity})`,
+    propsForLabels: {
+      fontSize: 12,
+      fontFamily: 'Montserrat-SemiBold',
+    },
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView 
+      style={styles.container}
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+    >
       <View style={styles.header}>
         <Text style={styles.title}>Spending Overview</Text>
         <Text style={styles.subtitle}>
@@ -81,9 +91,27 @@ const OverviewScreen: React.FC<OverviewProps> = ({route}) => {
             chartConfig={chartConfig}
             accessor="amount"
             backgroundColor="transparent"
-            paddingLeft="15"
+            paddingLeft="0"
             absolute
+            hasLegend={false}
+            style={styles.chart}
+            center={[screenWidth / 4.5, 0]}
+            avoidFalseZero={true}
           />
+          <View style={styles.legendContainer}>
+            {spendingByCategory.map((item, index) => (
+              <View key={index} style={styles.legendItem}>
+                <CategoryIcons 
+                  iconName={item.name.toLowerCase()} 
+                  size={16} 
+                  color={item.color}
+                />
+                <Text style={styles.legendText}>
+                  {item.name} ({((item.amount / totalSpending) * 100).toFixed(1)}%)
+                </Text>
+              </View>
+            ))}
+          </View>
         </View>
       ) : (
         <View style={styles.noDataContainer}>
@@ -95,12 +123,13 @@ const OverviewScreen: React.FC<OverviewProps> = ({route}) => {
         <Text style={styles.categoriesTitle}>Expenses by Category</Text>
         {spendingByCategory.map((item, index) => (
           <View key={index} style={styles.categoryItem}>
-            <View style={[styles.categoryDot, {backgroundColor: item.color}]} />
+            <CategoryIcons 
+              iconName={item.name.toLowerCase()} 
+              size={20} 
+              color={item.color}
+            />
             <Text style={styles.categoryName}>{item.name}</Text>
             <Text style={styles.categoryAmount}>${item.amount.toFixed(2)}</Text>
-            <Text style={styles.categoryPercentage}>
-              {((item.amount / totalSpending) * 100).toFixed(1)}%
-            </Text>
           </View>
         ))}
       </View>
@@ -112,7 +141,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  scrollContent: {
     padding: 20,
+    paddingBottom: 40,
   },
   header: {
     marginBottom: 20,
@@ -120,12 +152,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#201c5c',
     marginBottom: 5,
+    fontFamily: 'Montserrat-SemiBold',
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#201c5c',
+    fontFamily: 'Montserrat-SemiBold',
   },
   chartContainer: {
     backgroundColor: '#fff',
@@ -139,6 +173,35 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  chart: {
+    marginVertical: 8,
+    borderRadius: 16,
+  },
+  legendContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    paddingHorizontal: 10,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    margin: 8,
+    backgroundColor: '#fff',
+    padding: 8,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  legendText: {
+    fontSize: 12,
+    color: '#201c5c',
+    fontFamily: 'Montserrat-SemiBold',
+    marginLeft: 8,
+  },
   noDataContainer: {
     height: 220,
     justifyContent: 'center',
@@ -149,7 +212,8 @@ const styles = StyleSheet.create({
   },
   noDataText: {
     fontSize: 16,
-    color: '#999',
+    color: '#201c5c',
+    fontFamily: 'Montserrat-SemiBold',
   },
   categoriesList: {
     backgroundColor: '#fff',
@@ -165,7 +229,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 15,
-    color: '#333',
+    color: '#201c5c',
+    fontFamily: 'Montserrat-SemiBold',
   },
   categoryItem: {
     flexDirection: 'row',
@@ -174,29 +239,19 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
-  categoryDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 10,
-  },
   categoryName: {
     flex: 1,
     fontSize: 14,
-    color: '#333',
+    color: '#201c5c',
+    fontFamily: 'Montserrat-SemiBold',
+    marginLeft: 12,
   },
   categoryAmount: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#333',
-    marginRight: 8,
+    color: '#201c5c',
+    fontFamily: 'Montserrat-SemiBold',
     width: 80,
-    textAlign: 'right',
-  },
-  categoryPercentage: {
-    fontSize: 14,
-    color: '#666',
-    width: 45,
     textAlign: 'right',
   },
 });
