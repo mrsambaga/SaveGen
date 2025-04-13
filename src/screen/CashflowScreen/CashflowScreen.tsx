@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {View, Text, StyleSheet, FlatList, Image} from 'react-native';
+import {View, Text, StyleSheet, FlatList} from 'react-native';
 import {faPieChart} from '@fortawesome/free-solid-svg-icons';
 import {LineChart} from 'react-native-chart-kit';
 import {Dimensions} from 'react-native';
@@ -7,6 +7,7 @@ import Button from '../../components/Button';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import {Transaction} from '../../constants/types';
 import {CashflowProps} from '../../constants/props';
+import CategoryIcons from '../../components/CategoryIcons';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -67,7 +68,7 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
       description: 'Utilities',
       amount: -180,
       type: 'expense',
-      category: 'Bill',
+      category: 'Bills',
     },
     {
       id: '6',
@@ -75,7 +76,7 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
       description: 'Restaurant',
       amount: -75,
       type: 'expense',
-      category: 'Food & Drink',
+      category: 'FoodAndDrink',
     },
     {
       id: '7',
@@ -90,10 +91,7 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
   const renderTransactionItem = ({item}: {item: Transaction}) => (
     <View style={styles.transactionItem}>
       <View>
-        <Image
-          source={require('../../../assets/icons/wallet.png')}
-          style={styles.transactionIcon}
-        />
+        <CategoryIcons iconName={item.category} />
       </View>
       <View style={styles.transactionLeft}>
         <Text style={styles.transactionDescription}>{item.description}</Text>
@@ -271,10 +269,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
-  transactionIcon: {
-    width: 30,
-    height: 30,
-  },
   transactionLeft: {
     flex: 1,
     marginLeft: 20,
@@ -309,10 +303,6 @@ const styles = StyleSheet.create({
     padding: 2,
     borderRadius: 40,
     marginRight: 10,
-  },
-  overviewIcon: {
-    width: 15,
-    height: 17,
   },
   overviewTextContainer: {
     textAlign: 'center',

@@ -14,3 +14,15 @@ export type ChartDataItem = {
   legendFontColor: string;
   legendFontSize: number;
 };
+
+export type IconCategoryName =
+  | 'salary'
+  | 'groceries'
+  | 'bills'
+  | 'rent'
+  | 'travel'
+  | 'transportation'
+  | 'foodanddrink'
+  | 'shopping'
+  | 'education'
+  | 'family';

@@ -26,3 +26,9 @@ export type RegisterProps = {
 export type LandingProps = {
   navigation: StackNavigationProp<RootStackParamList, 'Landing'>;
 };
+
+export type CategoryIconsProps = {
+  iconName: string;
+  size?: number;
+  color?: string;
+};
