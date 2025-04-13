@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: 'Montserrat',
+    fontFamily: 'Montserrat-SemiBold',
     color: '#201c5c',
   },
   heading: {
