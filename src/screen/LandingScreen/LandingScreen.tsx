@@ -1,14 +1,6 @@
-import {StackNavigationProp} from '@react-navigation/stack';
 import {ImageBackground, StyleSheet, Text, View} from 'react-native';
 import Button from '../../components/Button';
-
-type RootStackParamList = {
-  Register: undefined;
-};
-
-type LandingProps = {
-  navigation: StackNavigationProp<RootStackParamList, 'Register'>;
-};
+import {LandingProps} from '../../constants/props';
 
 const LandingScreen: React.FC<LandingProps> = ({navigation}) => {
   return (

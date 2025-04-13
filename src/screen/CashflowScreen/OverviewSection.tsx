@@ -1,34 +1,10 @@
 import React, {useMemo} from 'react';
 import {View, Text, StyleSheet, Dimensions, ScrollView} from 'react-native';
 import {PieChart} from 'react-native-chart-kit';
-import {RouteProp} from '@react-navigation/native';
+import {ChartDataItem} from '../../constants/types';
+import {OverviewProps} from '../../constants/props';
 
 const screenWidth = Dimensions.get('window').width;
-
-type Transaction = {
-  id: string;
-  date: string;
-  description: string;
-  amount: number;
-  type: string;
-  category: string;
-};
-
-type ChartDataItem = {
-  name: string;
-  amount: number;
-  color: string;
-  legendFontColor: string;
-  legendFontSize: number;
-};
-
-type OverviewRouteParams = {
-  transactions: Transaction[];
-};
-
-type OverviewProps = {
-  route: RouteProp<{Overview: OverviewRouteParams}, 'Overview'>;
-};
 
 const OverviewScreen: React.FC<OverviewProps> = ({route}) => {
   const transactions = useMemo(() => {

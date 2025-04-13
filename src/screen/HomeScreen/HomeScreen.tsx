@@ -1,16 +1,7 @@
 import {Image, StyleSheet, View} from 'react-native';
 import {Text} from 'react-native-gesture-handler';
 import Button from '../../components/Button';
-import {StackNavigationProp} from '@react-navigation/stack';
-
-type RootStackParamList = {
-  Landing: undefined;
-  Register: undefined;
-};
-
-type HomeProps = {
-  navigation: StackNavigationProp<RootStackParamList, 'Register'>;
-};
+import {HomeProps} from '../../constants/props';
 
 const HomeScreen: React.FC<HomeProps> = ({navigation}) => {
   const income = 600;

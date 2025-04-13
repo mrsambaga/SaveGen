@@ -4,30 +4,11 @@ import {faPieChart} from '@fortawesome/free-solid-svg-icons';
 import {LineChart} from 'react-native-chart-kit';
 import {Dimensions} from 'react-native';
 import Button from '../../components/Button';
-import {StackNavigationProp} from '@react-navigation/stack';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {Transaction} from '../../constants/types';
+import {CashflowProps} from '../../constants/props';
 
 const screenWidth = Dimensions.get('window').width;
-
-type RootStackParamList = {
-  CashFlow: undefined;
-  Overview: {
-    transactions: Transaction[];
-  };
-};
-
-type Transaction = {
-  id: string;
-  date: string;
-  description: string;
-  amount: number;
-  type: string;
-  category: string;
-};
-
-type CashflowProps = {
-  navigation: StackNavigationProp<RootStackParamList, 'CashFlow'>;
-};
 
 const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
   const [chartData] = useState({

@@ -2,24 +2,9 @@ import {createStackNavigator} from '@react-navigation/stack';
 
 import CashflowScreen from '../screen/CashflowScreen/CashflowScreen';
 import OverviewSection from '../screen/CashflowScreen/OverviewSection';
+import {CashFlowStackParamList} from '../constants/navigation';
 
-type RootStackParamList = {
-  CashFlow: undefined;
-  Overview: {
-    transactions: Transaction[];
-  };
-};
-
-type Transaction = {
-  id: string;
-  date: string;
-  description: string;
-  amount: number;
-  type: string;
-  category: string;
-};
-
-const Stack = createStackNavigator<RootStackParamList>();
+const Stack = createStackNavigator<CashFlowStackParamList>();
 
 const CashFlowNavigation: React.FC = () => {
   return (

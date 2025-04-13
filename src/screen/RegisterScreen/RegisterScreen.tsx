@@ -1,20 +1,11 @@
-import {StackNavigationProp} from '@react-navigation/stack';
 import {Image, ImageBackground, StyleSheet, Text, View} from 'react-native';
 import FormInput from '../../components/FormInput';
 import {useState} from 'react';
 import Divider from '../../components/Divider';
 import Button from '../../components/Button';
+import {RegisterProps} from '../../constants/props';
 
-type RootStackParamList = {
-  Landing: undefined;
-  MainTabs: undefined;
-};
-
-type LoginProps = {
-  navigation: StackNavigationProp<RootStackParamList, 'MainTabs'>;
-};
-
-const RegisterScreen: React.FC<LoginProps> = ({navigation}) => {
+const RegisterScreen: React.FC<RegisterProps> = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
