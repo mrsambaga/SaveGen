@@ -25,4 +25,6 @@ export type IconCategoryName =
   | 'foodanddrink'
   | 'shopping'
   | 'education'
-  | 'family';
+  | 'family'
+  | 'entertainment'
+  | 'health';

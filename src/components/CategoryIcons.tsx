@@ -15,6 +15,8 @@ import {
   faGraduationCap,
   faUsers,
   faQuestion,
+  faHeartbeat,
+  faTheaterMasks,
 } from '@fortawesome/free-solid-svg-icons';
 
 const CategoryIcons: React.FC<CategoryIconsProps> = ({
@@ -33,6 +35,8 @@ const CategoryIcons: React.FC<CategoryIconsProps> = ({
     shopping: faShoppingBag,
     education: faGraduationCap,
     family: faUsers,
+    entertainment: faTheaterMasks,
+    health: faHeartbeat,
   };
 
   const iconLower = iconName.toLowerCase();
