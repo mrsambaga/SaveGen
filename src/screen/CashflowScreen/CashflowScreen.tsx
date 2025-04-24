@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
   chartTitle: {
     fontSize: 16,
     fontWeight: '600',
-    fontFamily: 'Montserrat-SemiBold',
+    fontFamily: 'Montserrat-Bold',
     color: '#201c5c',
   },
   timeSelector: {
@@ -275,9 +275,10 @@ const styles = StyleSheet.create({
   transactionContainer: {
     flex: 1,
     backgroundColor: '#fff',
-    borderRadius: 12,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
     margin: 15,
-    marginTop: 0,
+    marginBottom: 0,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
@@ -288,7 +289,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 15,
-    fontFamily: 'Montserrat-SemiBold',
+    fontFamily: 'Montserrat-Bold',
     color: '#201c5c',
     paddingHorizontal: 15,
     paddingTop: 15,
