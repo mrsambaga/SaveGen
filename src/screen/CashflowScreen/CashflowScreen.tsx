@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {View, Text, StyleSheet, FlatList} from 'react-native';
+import React, {useState, useMemo} from 'react';
+import {View, Text, StyleSheet, FlatList, SectionList} from 'react-native';
 import {faPieChart} from '@fortawesome/free-solid-svg-icons';
 import {LineChart} from 'react-native-chart-kit';
 import {Dimensions} from 'react-native';
@@ -86,7 +86,39 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
       type: 'income',
       category: 'Salary',
     },
+    {
+      id: '7',
+      date: '2025-02-02',
+      description: 'Salary',
+      amount: 1000000,
+      type: 'income',
+      category: 'Salary',
+    },
   ]);
+
+  const groupedTransactions = useMemo(() => {
+    const grouped = transactions.reduce((acc, transaction) => {
+      const date = new Date(transaction.date);
+      const monthYear = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      
+      if (!acc[monthYear]) {
+        acc[monthYear] = [];
+      }
+      acc[monthYear].push(transaction);
+      return acc;
+    }, {} as Record<string, Transaction[]>);
+
+    return Object.entries(grouped).map(([title, data]) => ({
+      title,
+      data,
+    }));
+  }, [transactions]);
+
+  const renderSectionHeader = ({section: {title}}: {section: {title: string}}) => (
+    <View style={styles.sectionHeader}>
+      <Text style={styles.sectionHeaderText}>{title}</Text>
+    </View>
+  );
 
   const renderTransactionItem = ({item}: {item: Transaction}) => (
     <View style={styles.transactionItem}>
@@ -164,9 +196,10 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
 
       <View style={styles.transactionContainer}>
         <Text style={styles.sectionTitle}>Recent Transactions</Text>
-        <FlatList
-          data={transactions}
+        <SectionList
+          sections={groupedTransactions}
           renderItem={renderTransactionItem}
+          renderSectionHeader={renderSectionHeader}
           keyExtractor={item => item.id}
           showsVerticalScrollIndicator={false}
           style={styles.transactionList}
@@ -245,7 +278,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     margin: 15,
     marginTop: 0,
-    padding: 15,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
@@ -258,6 +290,20 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     fontFamily: 'Montserrat-SemiBold',
     color: '#201c5c',
+    paddingHorizontal: 15,
+    paddingTop: 15,
+  },
+  sectionHeader: {
+    backgroundColor: '#f5f5f5',
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    marginTop: 10,
+  },
+  sectionHeaderText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#201c5c',
+    fontFamily: 'Montserrat-Bold',
   },
   transactionList: {
     flex: 1,
@@ -268,6 +314,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
+    paddingHorizontal: 15,
   },
   transactionLeft: {
     flex: 1,
