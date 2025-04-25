@@ -1,7 +1,7 @@
 export type Transaction = {
   id: string;
   date: string;
-  description: string;
+  detail: string;
   amount: number;
   type: string;
   category: string;
@@ -22,7 +22,7 @@ export type IconCategoryName =
   | 'rent'
   | 'travel'
   | 'transportation'
-  | 'foodanddrink'
+  | 'food&drink'
   | 'shopping'
   | 'education'
   | 'family'

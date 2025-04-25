@@ -33,7 +33,7 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
     {
       id: '1',
       date: '2025-04-07',
-      description: 'Salary',
+      detail: 'Salary',
       amount: 3800,
       type: 'income',
       category: 'Salary',
@@ -41,7 +41,7 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
     {
       id: '2',
       date: '2025-04-05',
-      description: 'Bread & Cheese',
+      detail: 'Bread & Cheese',
       amount: -120,
       type: 'expense',
       category: 'Groceries',
@@ -49,7 +49,7 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
     {
       id: '3',
       date: '2025-04-04',
-      description: 'Rent',
+      detail: 'Rent',
       amount: -1200,
       type: 'expense',
       category: 'Rent',
@@ -57,7 +57,7 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
     {
       id: '4',
       date: '2025-04-03',
-      description: 'Freelance Work',
+      detail: 'Freelance Work',
       amount: 350,
       type: 'income',
       category: 'Salary',
@@ -65,7 +65,7 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
     {
       id: '5',
       date: '2025-04-01',
-      description: 'Utilities',
+      detail: 'Utilities',
       amount: -180,
       type: 'expense',
       category: 'Bills',
@@ -73,15 +73,15 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
     {
       id: '6',
       date: '2025-03-30',
-      description: 'Restaurant',
+      detail: 'Restaurant',
       amount: -75,
       type: 'expense',
-      category: 'FoodAndDrink',
+      category: 'Food & Drink',
     },
     {
       id: '7',
       date: '2025-03-28',
-      description: 'Side Project',
+      detail: 'Side Project',
       amount: 200,
       type: 'income',
       category: 'Salary',
@@ -89,7 +89,7 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
     {
       id: '7',
       date: '2025-02-02',
-      description: 'Salary',
+      detail: 'Salary',
       amount: 1000000,
       type: 'income',
       category: 'Salary',
@@ -126,7 +126,7 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
         <CategoryIcons iconName={item.category} />
       </View>
       <View style={styles.transactionLeft}>
-        <Text style={styles.transactionDescription}>{item.description}</Text>
+        <Text style={styles.transactionDescription}>{item.detail}</Text>
         <Text style={styles.transactionDate}>{formatDate(item.date)}</Text>
       </View>
       <Text
