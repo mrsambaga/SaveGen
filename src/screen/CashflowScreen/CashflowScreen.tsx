@@ -15,6 +15,22 @@ const screenWidth = Dimensions.get('window').width;
 
 const API_BASE_URL = 'http://192.168.18.6:8080';
 
+const categoryIconLabelMap: Record<string, string> = {
+  'foodanddrink': 'Food & Drink',
+  'groceries': 'Groceries',
+  'salary': 'Salary',
+  'bills': 'Bills',
+  'rent': 'Rent',
+  'travel': 'Travel',
+  'transportation': 'Transportation',
+  'shopping': 'Shopping',
+  'education': 'Education',
+  'family': 'Family',
+  'entertainment': 'Entertainment',
+  'health': 'Health',
+  'other': 'Other',
+};
+
 const getTransactions = async (userId: number = 1): Promise<Transaction[]> => {
   try {
     const response = await axios.get<TransactionDto>(`${API_BASE_URL}/transactions`, {
@@ -99,7 +115,7 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
         <CategoryIcons iconName={item.transaction_category} />
       </View>
       <View style={styles.transactionLeft}>
-        <Text style={styles.transactionDescription}>{capitalize(item.transaction_category)}</Text>
+        <Text style={styles.transactionDescription}>{categoryIconLabelMap[item.transaction_category]}</Text>
         <Text style={styles.transactionDate}>{shortenText(item.detail, 20)}</Text>
         <Text style={styles.transactionDate}>{formatDate(item.date)}</Text>
       </View>
