@@ -14,12 +14,12 @@ const OverviewScreen: React.FC<OverviewProps> = ({route}) => {
 
   const spendingByCategory = useMemo<ChartDataItem[]>(() => {
     const expenseTransactions = transactions.filter(
-      transaction => transaction.type === 'expense',
+      transaction => transaction.transaction_type === 'debit',
     );
 
     const categoryTotals = expenseTransactions.reduce<Record<string, number>>(
       (acc, transaction) => {
-        const category = transaction.category;
+        const category = transaction.transaction_category;
         const amount = Math.abs(transaction.amount);
 
         if (!acc[category]) {
@@ -78,7 +78,10 @@ const OverviewScreen: React.FC<OverviewProps> = ({route}) => {
       <View style={styles.header}>
         <Text style={styles.title}>Spending Overview</Text>
         <Text style={styles.subtitle}>
-          Total Spending: ${totalSpending.toFixed(2)}
+          Total Spending: {totalSpending.toLocaleString('id-ID', {
+          style: 'currency',
+          currency: 'IDR',
+        })}
         </Text>
       </View>
 
@@ -129,7 +132,11 @@ const OverviewScreen: React.FC<OverviewProps> = ({route}) => {
               color={item.color}
             />
             <Text style={styles.categoryName}>{item.name}</Text>
-            <Text style={styles.categoryAmount}>${item.amount.toFixed(2)}</Text>
+            <Text style={styles.categoryAmount}>{item.amount.toLocaleString('id-ID', {
+              style: 'currency',
+              currency: 'IDR',
+            })}
+            </Text>
           </View>
         ))}
       </View>
@@ -251,7 +258,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#201c5c',
     fontFamily: 'Montserrat-SemiBold',
-    width: 80,
     textAlign: 'right',
   },
 });

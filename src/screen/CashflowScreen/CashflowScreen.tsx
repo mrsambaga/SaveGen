@@ -106,8 +106,11 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
           styles.transactionAmount,
           item.transaction_type === 'debit' ? styles.expenseText : styles.incomeText,
         ]}>
-        {item.transaction_type === 'debit' ? '- ' : '+ '}
-        {item.amount.toFixed(2)}
+        {item.transaction_type === 'debit' ? '-' : '+'}
+        {item.amount.toLocaleString('id-ID', {
+          style: 'currency',
+          currency: 'IDR',
+        })} 
       </Text>
     </View>
   );
