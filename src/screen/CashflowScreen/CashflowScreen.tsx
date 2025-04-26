@@ -104,9 +104,9 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
       <Text
         style={[
           styles.transactionAmount,
-          item.amount > 0 ? styles.incomeText : styles.expenseText,
+          item.transaction_type === 'debit' ? styles.expenseText : styles.incomeText,
         ]}>
-        {item.amount > 0 ? '+' : ''}
+        {item.transaction_type === 'debit' ? '- ' : '+ '}
         {item.amount.toFixed(2)}
       </Text>
     </View>
