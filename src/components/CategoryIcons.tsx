@@ -19,6 +19,13 @@ import {
   faTheaterMasks,
 } from '@fortawesome/free-solid-svg-icons';
 
+const handleCategoryName = (iconName: string) => {
+  if (iconName === 'food & drink') {
+    return 'foodanddrink';
+  }
+  return iconName;
+};
+
 const CategoryIcons: React.FC<CategoryIconsProps> = ({
   iconName,
   size = 30,
@@ -39,7 +46,8 @@ const CategoryIcons: React.FC<CategoryIconsProps> = ({
     health: faHeartbeat,
   };
 
-  const iconLower = iconName.toLowerCase();
+  console.log('iconName:', iconName);
+  const iconLower = handleCategoryName(iconName).toLowerCase();
 
   const isValidCategory = (name: string): name is IconCategoryName => {
     return Object.keys(iconMap).includes(name);

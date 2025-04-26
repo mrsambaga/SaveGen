@@ -3,8 +3,8 @@ export type Transaction = {
   date: string;
   detail: string;
   amount: number;
-  type: string;
-  category: string;
+  transaction_type: string;
+  transaction_category: string;
 };
 
 export type ChartDataItem = {
@@ -22,7 +22,7 @@ export type IconCategoryName =
   | 'rent'
   | 'travel'
   | 'transportation'
-  | 'food&drink'
+  | 'foodanddrink'
   | 'shopping'
   | 'education'
   | 'family'

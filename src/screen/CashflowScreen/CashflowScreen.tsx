@@ -1,4 +1,4 @@
-import React, {useState, useMemo} from 'react';
+import React, {useState, useMemo, useEffect} from 'react';
 import {View, Text, StyleSheet, FlatList, SectionList} from 'react-native';
 import {faPieChart} from '@fortawesome/free-solid-svg-icons';
 import {LineChart} from 'react-native-chart-kit';
@@ -8,10 +8,45 @@ import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import {Transaction} from '../../constants/types';
 import {CashflowProps} from '../../constants/props';
 import CategoryIcons from '../../components/CategoryIcons';
-
+import axios, { AxiosError } from 'axios';
+import { TransactionDto } from '../../constants/dto';
 const screenWidth = Dimensions.get('window').width;
 
+const API_BASE_URL = 'http://192.168.18.6:8080';
+
+const getTransactions = async (userId: number = 1): Promise<Transaction[]> => {
+  try {
+    const response = await axios.get<TransactionDto>(`${API_BASE_URL}/transactions`, {
+      params: {
+        user_id: userId
+      }
+    });
+
+    return response.data.data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      throw new Error(`Failed to fetch transactions: ${error.message}`);
+    }
+    throw error;
+  }
+};
+
 const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const fetchedTransactions = await getTransactions(1);
+        setTransactions(fetchedTransactions);
+      } catch (error) {
+        setTransactions([]);
+      }
+    };
+    
+    fetchTransactions();
+  }, []);
+
   const [chartData] = useState({
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
     datasets: [
@@ -29,74 +64,11 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
     legend: ['Income', 'Spending'],
   });
 
-  const [transactions] = useState<Transaction[]>([
-    {
-      id: '1',
-      date: '2025-04-07',
-      detail: 'Salary',
-      amount: 3800,
-      type: 'income',
-      category: 'Salary',
-    },
-    {
-      id: '2',
-      date: '2025-04-05',
-      detail: 'Bread & Cheese',
-      amount: -120,
-      type: 'expense',
-      category: 'Groceries',
-    },
-    {
-      id: '3',
-      date: '2025-04-04',
-      detail: 'Rent',
-      amount: -1200,
-      type: 'expense',
-      category: 'Rent',
-    },
-    {
-      id: '4',
-      date: '2025-04-03',
-      detail: 'Freelance Work',
-      amount: 350,
-      type: 'income',
-      category: 'Salary',
-    },
-    {
-      id: '5',
-      date: '2025-04-01',
-      detail: 'Utilities',
-      amount: -180,
-      type: 'expense',
-      category: 'Bills',
-    },
-    {
-      id: '6',
-      date: '2025-03-30',
-      detail: 'Restaurant',
-      amount: -75,
-      type: 'expense',
-      category: 'Food & Drink',
-    },
-    {
-      id: '7',
-      date: '2025-03-28',
-      detail: 'Side Project',
-      amount: 200,
-      type: 'income',
-      category: 'Salary',
-    },
-    {
-      id: '7',
-      date: '2025-02-02',
-      detail: 'Salary',
-      amount: 1000000,
-      type: 'income',
-      category: 'Salary',
-    },
-  ]);
-
   const groupedTransactions = useMemo(() => {
+    if (!Array.isArray(transactions) || transactions.length === 0) {
+      return [];
+    }
+    
     const grouped = transactions.reduce((acc, transaction) => {
       const date = new Date(transaction.date);
       const monthYear = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -123,7 +95,7 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
   const renderTransactionItem = ({item}: {item: Transaction}) => (
     <View style={styles.transactionItem}>
       <View>
-        <CategoryIcons iconName={item.category} />
+        <CategoryIcons iconName={item.transaction_category} />
       </View>
       <View style={styles.transactionLeft}>
         <Text style={styles.transactionDescription}>{item.detail}</Text>
