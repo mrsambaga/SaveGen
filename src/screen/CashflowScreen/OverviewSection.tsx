@@ -4,6 +4,7 @@ import {PieChart} from 'react-native-chart-kit';
 import {ChartDataItem} from '../../constants/types';
 import {OverviewProps} from '../../constants/props';
 import CategoryIcons from '../../components/CategoryIcons';
+import { formatCurrency } from '../../utils/Formatter';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -78,10 +79,7 @@ const OverviewScreen: React.FC<OverviewProps> = ({route}) => {
       <View style={styles.header}>
         <Text style={styles.title}>Spending Overview</Text>
         <Text style={styles.subtitle}>
-          Total Spending: {totalSpending.toLocaleString('id-ID', {
-          style: 'currency',
-          currency: 'IDR',
-        })}
+          Total Spending: {formatCurrency(totalSpending)}
         </Text>
       </View>
 
@@ -132,11 +130,7 @@ const OverviewScreen: React.FC<OverviewProps> = ({route}) => {
               color={item.color}
             />
             <Text style={styles.categoryName}>{item.name}</Text>
-            <Text style={styles.categoryAmount}>{item.amount.toLocaleString('id-ID', {
-              style: 'currency',
-              currency: 'IDR',
-            })}
-            </Text>
+            <Text style={styles.categoryAmount}>{formatCurrency(item.amount)}</Text>
           </View>
         ))}
       </View>
