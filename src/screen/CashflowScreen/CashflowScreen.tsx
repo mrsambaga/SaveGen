@@ -116,7 +116,9 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
       </View>
       <View style={styles.transactionLeft}>
         <Text style={styles.transactionDescription}>{categoryIconLabelMap[item.transaction_category]}</Text>
-        <Text style={styles.transactionDate}>{shortenText(item.detail, 20)}</Text>
+        {item.detail && (
+          <Text style={styles.transactionDate}>{shortenText(item.detail, 20)}</Text>
+        )}
         <Text style={styles.transactionDate}>{formatDate(item.date)}</Text>
       </View>
       <Text

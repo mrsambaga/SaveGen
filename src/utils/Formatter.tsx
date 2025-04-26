@@ -16,7 +16,6 @@ export const capitalize = (text: string) => {
 export const shortenText = (text: string, maxLength: number = 10) => {
   if (!text) return '';
 
-  console.log('text:', text);
   return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
 };
 
