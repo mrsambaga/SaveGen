@@ -13,3 +13,9 @@ export const capitalize = (text: string) => {
   return text.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 };
 
+export const shortenText = (text: string, maxLength: number = 10) => {
+  if (!text) return '';
+
+  return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+};
+
