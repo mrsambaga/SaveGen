@@ -7,6 +7,11 @@ export type CashflowProps = {
   navigation: StackNavigationProp<CashFlowStackParamList, 'CashFlow'>;
 };
 
+export type SpendingChartProps = {
+  navigation: StackNavigationProp<CashFlowStackParamList, 'CashFlow'>;
+  transactions: Transaction[];
+};
+
 type OverviewRouteParams = {
   transactions: Transaction[];
 };

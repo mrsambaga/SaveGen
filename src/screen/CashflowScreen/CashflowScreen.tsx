@@ -1,10 +1,6 @@
 import React, {useState, useMemo, useEffect} from 'react';
 import {View, Text, StyleSheet, SectionList} from 'react-native';
-import {faPieChart} from '@fortawesome/free-solid-svg-icons';
-import {LineChart} from 'react-native-chart-kit';
 import {Dimensions} from 'react-native';
-import Button from '../../components/Button';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import {Transaction} from '../../constants/types';
 import {CashflowProps} from '../../constants/props';
 import CategoryIcons from '../../components/CategoryIcons';
@@ -12,6 +8,7 @@ import axios, { AxiosError } from 'axios';
 import { TransactionDto } from '../../constants/dto';
 import { formatCurrency, shortenText } from '../../utils/Formatter';
 import { path } from '../../constants/path';
+import SpendingChart from './SpendingChart';
 const screenWidth = Dimensions.get('window').width;
 
 const categoryIconLabelMap: Record<string, string> = {
@@ -169,46 +166,21 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
     backgroundGradientFrom: '#fff',
     backgroundGradientTo: '#fff',
     decimalPlaces: 0,
-    color: (opacity = 1) => `rgba(19, 13, 91, ${opacity})`,
+    color: (opacity = 1) => `rgba(46, 204, 113, ${opacity})`,
     labelColor: (opacity = 1) => `rgba(32, 28, 92, ${opacity})`,
     style: {
       borderRadius: 16,
     },
-    propsForDots: {
-      r: '5',
-      strokeWidth: '2',
+    barPercentage: 0.4,
+    propsForBackgroundLines: {
+      strokeWidth: 0,
     },
+    formatYLabel: (value: string) => formatCurrency(Number(value)),
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.chartContainer}>
-        <View style={styles.chartHeader}>
-          <Text style={styles.chartTitle}>Income vs Spending</Text>
-        </View>
-        <LineChart
-          data={chartData}
-          width={screenWidth - 40}
-          height={220}
-          chartConfig={chartConfig}
-          bezier
-          style={styles.chart}
-          fromZero
-        />
-        <View style={styles.overviewSection}>
-          <Button
-            title="Overview"
-            onPress={() => navigation.navigate('Overview', {transactions})}
-            buttonStyle={styles.buttonOverviewContainer}>
-            <View style={styles.overviewIconContainer}>
-              <FontAwesomeIcon icon={faPieChart} size={20} color={'#ffffff'} />
-            </View>
-            <View style={styles.overviewTextContainer}>
-              <Text style={styles.overviewText}>Overview</Text>
-            </View>
-          </Button>
-        </View>
-      </View>
+      <SpendingChart navigation={navigation} transactions={transactions} />
 
       <View style={styles.transactionContainer}>
         <Text style={styles.sectionTitle}>Recent Transactions</Text>
@@ -238,30 +210,6 @@ const styles = StyleSheet.create({
   expenseText: {
     color: '#e74c3c',
     fontFamily: 'Montserrat-SemiBold',
-  },
-  chartContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    margin: 15,
-    marginTop: 0,
-    padding: 15,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  chartHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  chartTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    fontFamily: 'Montserrat-Bold',
-    color: '#201c5c',
   },
   timeSelector: {
     flexDirection: 'row',
@@ -351,33 +299,6 @@ const styles = StyleSheet.create({
   transactionAmount: {
     fontSize: 16,
     fontWeight: '600',
-  },
-  overviewSection: {
-    alignItems: 'center',
-  },
-  buttonOverviewContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 30,
-    backgroundColor: '#201c5c',
-    paddingVertical: 10,
-    borderRadius: 15,
-    width: '50%',
-  },
-  overviewIconContainer: {
-    padding: 2,
-    borderRadius: 40,
-    marginRight: 10,
-  },
-  overviewTextContainer: {
-    textAlign: 'center',
-    justifyContent: 'center',
-    alignContent: 'center',
-    width: '100%',
-  },
-  overviewText: {
-    fontSize: 14,
-    fontFamily: 'Montserrat-SemiBold',
-    color: '#ffffff',
   },
 });
 
