@@ -5,7 +5,7 @@ import Button from '../../components/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPieChart } from '@fortawesome/free-solid-svg-icons';
 import { SpendingChartProps } from '../../constants/props';
-import { formatCurrency, formatCurrencyLabel } from '../../utils/Formatter';
+import { formatCurrencyLabel } from '../../utils/Formatter';
 
 const SpendingChart: React.FC<SpendingChartProps> = ({ navigation, transactions }) => {
   const screenWidth = Dimensions.get('window').width;
@@ -43,24 +43,23 @@ const SpendingChart: React.FC<SpendingChartProps> = ({ navigation, transactions 
         <Text style={styles.chartTitle}>Income vs Spending</Text>
       </View>
       <ScrollView horizontal>
-        <View style={{ width: screenWidth * 1.2 }}>
+        <View style={{ width: '100%' }}>
           <VictoryChart
-            domainPadding={{ x: 25 }}
-            padding={{ top: 20, bottom: 50, left: 50, right: 40 }}
-            width={screenWidth * 1.1}
+            padding={{ top: 20, bottom: 35, left: 40, right: 10 }}
+            width={screenWidth}
             height={200}
           >
             <VictoryAxis
               tickFormat={(tick) => tick}
               style={{
-                tickLabels: { fontSize: 12, padding: 5 }
+                tickLabels: styles.label
               }}
             />
             <VictoryAxis
               dependentAxis
               tickFormat={(tick) => formatCurrencyLabel(tick)}
               style={{
-                tickLabels: { fontSize: 12, padding: 5 }
+                tickLabels: styles.label
               }}
             />
             <VictoryGroup
@@ -82,10 +81,11 @@ const SpendingChart: React.FC<SpendingChartProps> = ({ navigation, transactions 
         </View>
       </ScrollView>
       <VictoryLegend
+        x={screenWidth / 5.5}
         height={20}
         orientation="horizontal"
-        gutter={20}
-        style={{ labels: { fontSize: 12 } }}
+        gutter={30}
+        style={{ labels: styles.legend }}
         data={[
           { name: "Income", symbol: { fill: "#13b062" } },
           { name: "Expenses", symbol: { fill: "#e74c3c" } },
@@ -121,6 +121,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
+  },
+  legend: {
+    fontSize: 14,
+    fontFamily: 'Montserrat-SemiBold',
+    color: '#201c5c',
+  },
+  label: {
+    fontSize: 12,
+    fontFamily: 'Montserrat',
+    color: '#201c5c',
+    padding: 5,
   },
   chartHeader: {
     flexDirection: 'row',
