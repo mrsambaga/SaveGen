@@ -11,11 +11,11 @@ const SpendingChart: React.FC<SpendingChartProps> = ({ navigation, transactions 
   const screenWidth = Dimensions.get('window').width;
 
   const chartData = useMemo(() => {
-    const months = Array.from({ length: 6 }, (_, i) => {
-      const date = new Date();
-      date.setMonth(date.getMonth() - i);
+    const months = Array.from({ length: 5 }, (_, i) => {
+      const date = new Date(transactions[0] ? transactions[0].date : '');
+      date.setMonth(date.getMonth() + i);
       return date.toLocaleDateString('en-US', { month: 'short' });
-    }).reverse();
+    });
 
     const incomeData = months.map(month => ({ x: month, y: 0 }));
     const expensesData = months.map(month => ({ x: month, y: 0 }));
@@ -45,8 +45,8 @@ const SpendingChart: React.FC<SpendingChartProps> = ({ navigation, transactions 
       <ScrollView horizontal>
         <View style={{ width: '100%' }}>
           <VictoryChart
-            padding={{ top: 20, bottom: 35, left: 40, right: 10 }}
-            width={screenWidth}
+            padding={{ top: 20, bottom: 35, left: 35, right: 10 }}
+            width={screenWidth / 1.2}
             height={200}
           >
             <VictoryAxis
