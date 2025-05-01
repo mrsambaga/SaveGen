@@ -10,10 +10,9 @@ import {CashflowProps} from '../../constants/props';
 import CategoryIcons from '../../components/CategoryIcons';
 import axios, { AxiosError } from 'axios';
 import { TransactionDto } from '../../constants/dto';
-import { capitalize, formatCurrency, shortenText } from '../../utils/Formatter';
+import { formatCurrency, shortenText } from '../../utils/Formatter';
+import { SAVEGEN_API } from '@env';
 const screenWidth = Dimensions.get('window').width;
-
-const API_BASE_URL = 'http://192.168.18.6:8080';
 
 const categoryIconLabelMap: Record<string, string> = {
   'foodanddrink': 'Food & Drink',
@@ -33,7 +32,7 @@ const categoryIconLabelMap: Record<string, string> = {
 
 const getTransactions = async (userId: number = 1): Promise<Transaction[]> => {
   try {
-    const response = await axios.get<TransactionDto>(`${API_BASE_URL}/transactions`, {
+    const response = await axios.get<TransactionDto>(`${SAVEGEN_API}/transactions`, {
       params: {
         user_id: userId
       }
