@@ -1,5 +1,5 @@
 import React, {useState, useMemo, useEffect} from 'react';
-import {View, Text, StyleSheet, FlatList, SectionList} from 'react-native';
+import {View, Text, StyleSheet, SectionList} from 'react-native';
 import {faPieChart} from '@fortawesome/free-solid-svg-icons';
 import {LineChart} from 'react-native-chart-kit';
 import {Dimensions} from 'react-native';
@@ -11,7 +11,7 @@ import CategoryIcons from '../../components/CategoryIcons';
 import axios, { AxiosError } from 'axios';
 import { TransactionDto } from '../../constants/dto';
 import { formatCurrency, shortenText } from '../../utils/Formatter';
-import { SAVEGEN_API } from '@env';
+import { path } from '../../constants/path';
 const screenWidth = Dimensions.get('window').width;
 
 const categoryIconLabelMap: Record<string, string> = {
@@ -32,7 +32,7 @@ const categoryIconLabelMap: Record<string, string> = {
 
 const getTransactions = async (userId: number = 1): Promise<Transaction[]> => {
   try {
-    const response = await axios.get<TransactionDto>(`${SAVEGEN_API}/transactions`, {
+    const response = await axios.get<TransactionDto>(path.GET_TRANSACTIONS, {
       params: {
         user_id: userId
       }
