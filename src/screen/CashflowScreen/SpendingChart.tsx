@@ -58,7 +58,7 @@ const SpendingChart: React.FC<SpendingChartProps> = ({ navigation, transactions 
             />
             <VictoryAxis
               dependentAxis
-              tickFormat={(tick) => formatCurrency(tick)}
+              tickFormat={(tick) => formatCurrencyLabel(tick)}
               style={{
                 tickLabels: { fontSize: 12, padding: 5 }
               }}

@@ -7,6 +7,16 @@ export const formatCurrency = (amount: number) => {
   });
 };
 
+export const formatCurrencyLabel = (amount: number) => {
+  if (amount >= 1000000) {
+    return `${(amount / 1000000)} M`;
+  }
+  if (amount >= 1000) {
+    return `${(amount / 1000).toFixed(1)}k`;
+  }
+  return amount.toString();
+};
+
 export const capitalize = (text: string) => {
   if (!text) return '';
 
