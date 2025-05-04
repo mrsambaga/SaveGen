@@ -10,6 +10,23 @@ import { useTransactions } from '../../context/TransactionContext';
 const HomeScreen: React.FC<HomeProps> = ({navigation}) => {
   const {transactions} = useTransactions();
 
+  const thisMonthSpending = useMemo(() => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+
+    return transactions
+      .filter((transaction: Transaction) => {
+        const transactionDate = new Date(transaction.date);
+        return (
+          transaction.transaction_type === 'debit' &&
+          transactionDate.getMonth() === currentMonth &&
+          transactionDate.getFullYear() === currentYear
+        );
+      })
+      .reduce((sum: number, transaction: Transaction) => sum + Math.abs(transaction.amount), 0);
+  }, [transactions]);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome back, Sam!</Text>
@@ -22,7 +39,7 @@ const HomeScreen: React.FC<HomeProps> = ({navigation}) => {
           />
         </View>
         <View>
-          <Text style={styles.spendingText}>{'Rp 10.000.000'}</Text>
+          <Text style={styles.spendingText}>{formatCurrency(thisMonthSpending)}</Text>
         </View>
         <View style={styles.ratioBar}>
           <View style={[styles.spendingBar, {flex: 1}]} />
