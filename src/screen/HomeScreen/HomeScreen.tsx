@@ -27,6 +27,16 @@ const HomeScreen: React.FC<HomeProps> = ({navigation}) => {
       .reduce((sum: number, transaction: Transaction) => sum + Math.abs(transaction.amount), 0);
   }, [transactions]);
 
+  const getCurrentBalance = useMemo(() => {
+    return transactions.reduce((sum: number, transaction: Transaction) => {
+      if (transaction.transaction_type === 'debit') {
+        return sum - transaction.amount;
+      }
+      return sum + transaction.amount;
+    }, 0);
+  }, [transactions]);
+  
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome back, Sam!</Text>
@@ -51,8 +61,8 @@ const HomeScreen: React.FC<HomeProps> = ({navigation}) => {
           style={styles.walletIcon}
         />
         <View style={styles.walletRight}>
-          <Text style={styles.heading2}>Cash Wallet</Text>
-          <Text style={styles.heading}>IDR 30.000.000</Text>
+          <Text style={styles.heading2}>Current Balance</Text>
+          <Text style={styles.heading}>{formatCurrency(getCurrentBalance)}</Text>
         </View>
         <Image
           source={require('../../../assets/icons/eye.png')}
