@@ -13,9 +13,9 @@ const SpendingChart: React.FC<SpendingChartProps> = ({ navigation, transactions 
   const chartData = useMemo(() => {
     const months = Array.from({ length: 5 }, (_, i) => {
       const date = new Date(transactions[0] ? transactions[0].date : '');
-      date.setMonth(date.getMonth() + i);
+      date.setMonth(date.getMonth() - i);
       return date.toLocaleDateString('en-US', { month: 'short' });
-    });
+    }).reverse();
 
     const incomeData = months.map(month => ({ x: month, y: 0 }));
     const expensesData = months.map(month => ({ x: month, y: 0 }));
