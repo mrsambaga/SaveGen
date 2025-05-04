@@ -2,29 +2,31 @@ import {Image, StyleSheet, View} from 'react-native';
 import {Text} from 'react-native-gesture-handler';
 import Button from '../../components/Button';
 import {HomeProps} from '../../constants/props';
+import { useMemo } from 'react';
+import { formatCurrency } from '../../utils/Formatter';
+import { Transaction } from '../../constants/types';
 
 const HomeScreen: React.FC<HomeProps> = ({navigation}) => {
   const income = 600;
   const expenses = 400;
   const total = income + expenses;
-  const incomeRatio = income / total;
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome back, Sam!</Text>
       <View style={styles.card}>
         <View style={styles.topCard}>
-          <Text style={styles.cardText}>Your spending</Text>
+          <Text style={styles.cardText}>This Month Spending</Text>
           <Image
             source={require('../../../assets/icons/coin.png')}
             style={styles.icon}
           />
         </View>
         <View>
-          <Text style={styles.spendingText}>Rp 1.0000.000</Text>
+          <Text style={styles.spendingText}>{'Rp 10.000.000'}</Text>
         </View>
         <View style={styles.ratioBar}>
-          <View style={[styles.spendingBar, {flex: incomeRatio}]} />
+          <View style={[styles.spendingBar, {flex: 1}]} />
         </View>
       </View>
       <View style={styles.wallet}>
@@ -80,7 +82,7 @@ const styles = StyleSheet.create({
   },
   topCard: {
     flexDirection: 'row',
-    gap: '25%',
+    gap: '8%',
     marginBottom: 10,
   },
   icon: {
