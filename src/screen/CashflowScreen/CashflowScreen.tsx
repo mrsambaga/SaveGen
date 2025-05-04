@@ -1,15 +1,11 @@
 import React, {useState, useMemo, useEffect} from 'react';
 import {View, Text, StyleSheet, SectionList} from 'react-native';
-import {Dimensions} from 'react-native';
 import {Transaction} from '../../constants/types';
 import {CashflowProps} from '../../constants/props';
 import CategoryIcons from '../../components/CategoryIcons';
-import axios, { AxiosError } from 'axios';
-import { TransactionDto } from '../../constants/dto';
 import { formatCurrency, shortenText } from '../../utils/Formatter';
-import { path } from '../../constants/path';
 import SpendingChart from './SpendingChart';
-const screenWidth = Dimensions.get('window').width;
+import { fetchTransactions } from '../../service/transactionService';
 
 const categoryIconLabelMap: Record<string, string> = {
   'foodanddrink': 'Food & Drink',
@@ -27,37 +23,20 @@ const categoryIconLabelMap: Record<string, string> = {
   'other': 'Other',
 };
 
-const getTransactions = async (userId: number = 1): Promise<Transaction[]> => {
-  try {
-    const response = await axios.get<TransactionDto>(path.GET_TRANSACTIONS, {
-      params: {
-        user_id: userId
-      }
-    });
-
-    return response.data.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      throw new Error(`Failed to fetch transactions: ${error.message}`);
-    }
-    throw error;
-  }
-};
-
 const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {
-    const fetchTransactions = async () => {
+    const getTransactions = async () => {
       try {
-        const fetchedTransactions = await getTransactions(1);
+        const fetchedTransactions = await fetchTransactions(1);
         setTransactions(fetchedTransactions);
       } catch (error) {
         setTransactions([]);
       }
     };
     
-    fetchTransactions();
+    getTransactions();
   }, []);
 
   const chartData = useMemo(() => {

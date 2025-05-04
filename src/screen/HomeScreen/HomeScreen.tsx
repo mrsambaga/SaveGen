@@ -5,11 +5,10 @@ import {HomeProps} from '../../constants/props';
 import { useMemo } from 'react';
 import { formatCurrency } from '../../utils/Formatter';
 import { Transaction } from '../../constants/types';
+import { useTransactions } from '../../context/TransactionContext';
 
 const HomeScreen: React.FC<HomeProps> = ({navigation}) => {
-  const income = 600;
-  const expenses = 400;
-  const total = income + expenses;
+  const {transactions} = useTransactions();
 
   return (
     <View style={styles.container}>
