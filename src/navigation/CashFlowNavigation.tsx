@@ -8,11 +8,11 @@ const Stack = createStackNavigator<CashFlowStackParamList>();
 
 const CashFlowNavigation: React.FC = () => {
   return (
-    <Stack.Navigator initialRouteName="CashFlow">
+    <Stack.Navigator initialRouteName="Transactions">
       <Stack.Screen
-        name="CashFlow"
+        name="Transactions"
         component={CashflowScreen}
-        options={{title: 'Cashflow', headerShown: false}}
+        options={{title: 'Transactions', headerShown: false}}
       />
       <Stack.Screen
         name="Overview"

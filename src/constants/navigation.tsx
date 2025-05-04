@@ -9,7 +9,7 @@ export type RootStackParamList = {
 };
 
 export type CashFlowStackParamList = {
-  CashFlow: undefined;
+  Transactions: undefined;
   Overview: {
     transactions: Transaction[];
   };
