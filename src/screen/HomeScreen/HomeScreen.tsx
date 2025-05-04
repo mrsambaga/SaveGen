@@ -1,14 +1,15 @@
-import {Image, StyleSheet, View} from 'react-native';
+import {Image, StyleSheet, View, TouchableOpacity} from 'react-native';
 import {Text} from 'react-native-gesture-handler';
 import Button from '../../components/Button';
 import {HomeProps} from '../../constants/props';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { formatCurrency } from '../../utils/Formatter';
 import { Transaction } from '../../constants/types';
 import { useTransactions } from '../../context/TransactionContext';
 
 const HomeScreen: React.FC<HomeProps> = ({navigation}) => {
   const {transactions} = useTransactions();
+  const [showBalance, setShowBalance] = useState(false);
 
   const thisMonthSpending = useMemo(() => {
     const currentDate = new Date();
@@ -36,6 +37,9 @@ const HomeScreen: React.FC<HomeProps> = ({navigation}) => {
     }, 0);
   }, [transactions]);
   
+  const toggleBalanceVisibility = () => {
+    setShowBalance(!showBalance);
+  };
 
   return (
     <View style={styles.container}>
@@ -62,12 +66,19 @@ const HomeScreen: React.FC<HomeProps> = ({navigation}) => {
         />
         <View style={styles.walletRight}>
           <Text style={styles.heading2}>Current Balance</Text>
-          <Text style={styles.heading}>{formatCurrency(getCurrentBalance)}</Text>
+          <Text style={styles.heading}>
+            {showBalance ? formatCurrency(getCurrentBalance) : '************'}
+          </Text>
         </View>
-        <Image
-          source={require('../../../assets/icons/eye.png')}
-          style={styles.eyeIcon}
-        />
+        <TouchableOpacity 
+          style={styles.eyeIconContainer} 
+          onPress={toggleBalanceVisibility}
+        >
+          <Image
+            source={require('../../../assets/icons/eye.png')}
+            style={styles.eyeIcon}
+          />
+        </TouchableOpacity>
       </View>
       <View style={styles.budgetingContainer}>
         <Text style={styles.heading}>Budgeting</Text>
@@ -135,6 +146,7 @@ const styles = StyleSheet.create({
     color: '#201c5c',
   },
   heading: {
+    marginTop: 5,
     fontSize: 20,
     fontFamily: 'Montserrat-Bold',
     color: '#201c5c',
@@ -215,9 +227,12 @@ const styles = StyleSheet.create({
   walletRight: {
     marginLeft: '5%',
     paddingTop: 10,
+    flex: 1,
+  },
+  eyeIconContainer: {
+    padding: 10,
   },
   eyeIcon: {
-    marginLeft: 30,
     width: 35,
     height: 20,
   },
