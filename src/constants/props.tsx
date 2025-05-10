@@ -4,11 +4,11 @@ import {RouteProp} from '@react-navigation/native';
 import {Transaction} from './types';
 
 export type CashflowProps = {
-  navigation: StackNavigationProp<CashFlowStackParamList, 'CashFlow'>;
+  navigation: StackNavigationProp<CashFlowStackParamList, 'Transactions'>;
 };
 
 export type SpendingChartProps = {
-  navigation: StackNavigationProp<CashFlowStackParamList, 'CashFlow'>;
+  navigation: StackNavigationProp<CashFlowStackParamList, 'Transactions'>;
   transactions: Transaction[];
 };
 
