@@ -1,9 +1,9 @@
-import {Image, StyleSheet, View, TouchableOpacity} from 'react-native';
-import {Text} from 'react-native-gesture-handler';
+import { Image, StyleSheet, View, TouchableOpacity } from 'react-native';
+import { FlatList, Text } from 'react-native-gesture-handler';
 import Button from '../../components/Button';
-import {HomeProps} from '../../constants/props';
+import { HomeProps } from '../../constants/props';
 import { useMemo, useState } from 'react';
-import { formatCurrency } from '../../utils/Formatter';
+import { formatCurrency, shortenText } from '../../utils/Formatter';
 import { Transaction } from '../../constants/types';
 import { useTransactions } from '../../context/TransactionContext';
 import {
@@ -11,9 +11,26 @@ import {
   faEyeSlash,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import CategoryIcons from '../../components/CategoryIcons';
 
-const HomeScreen: React.FC<HomeProps> = ({navigation}) => {
-  const {transactions} = useTransactions();
+const categoryIconLabelMap: Record<string, string> = {
+  'foodanddrink': 'Food & Drink',
+  'groceries': 'Groceries',
+  'salary': 'Salary',
+  'bills': 'Bills',
+  'rent': 'Rent',
+  'travel': 'Travel',
+  'transportation': 'Transportation',
+  'shopping': 'Shopping',
+  'education': 'Education',
+  'family': 'Family',
+  'entertainment': 'Entertainment',
+  'health': 'Health',
+  'other': 'Other',
+};
+
+const HomeScreen: React.FC<HomeProps> = ({ navigation }) => {
+  const { transactions } = useTransactions();
   const [showBalance, setShowBalance] = useState(false);
 
   const thisMonthSpending = useMemo(() => {
@@ -41,10 +58,64 @@ const HomeScreen: React.FC<HomeProps> = ({navigation}) => {
       return sum + transaction.amount;
     }, 0);
   }, [transactions]);
-  
+
   const toggleBalanceVisibility = () => {
     setShowBalance(!showBalance);
   };
+
+  const topThreeSpending = useMemo(() => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+
+    const monthlyDebitTransaction: Transaction[] = transactions.filter((transaction: Transaction) => {
+      const transactionDate = new Date(transaction.date);
+      return (
+        transaction.transaction_type === 'debit' &&
+        transactionDate.getMonth() === currentMonth &&
+        transactionDate.getFullYear() === currentYear
+      );
+    })
+
+    const spendingByCategory: { [categoryName: string]: number } = {};
+    monthlyDebitTransaction.forEach((transaction) => {
+      const amount = Math.abs(transaction.amount);
+      spendingByCategory[transaction.transaction_category!] = (spendingByCategory[transaction.transaction_category!] || 0) + amount;
+    })
+
+    const categoriesArray = Object.keys(spendingByCategory).map(categoryName => ({
+      categoryName: categoryName,
+      totalAmount: spendingByCategory[categoryName],
+    }));
+
+    return categoriesArray.sort((a, b) => b.totalAmount - a.totalAmount).slice(0, 3);
+  }, [transactions]);
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  };
+
+  const renderTopSpending = ({ item }: { item: { categoryName: string, totalAmount: number } }) => {
+    return (
+      <View style={styles.topSpendingItem}>
+        <View>
+          <CategoryIcons iconName={item.categoryName} />
+        </View>
+        <View style={styles.spendingSectionLeft}>
+          <Text style={styles.transactionDescription}>{categoryIconLabelMap[item.categoryName]}</Text>
+        </View>
+        <Text
+          style={styles.spendingAmount}>
+          {formatCurrency(item.totalAmount)}
+        </Text>
+      </View>
+    )
+  }
 
   return (
     <View style={styles.container}>
@@ -61,7 +132,7 @@ const HomeScreen: React.FC<HomeProps> = ({navigation}) => {
           <Text style={styles.spendingText}>{formatCurrency(thisMonthSpending)}</Text>
         </View>
         <View style={styles.ratioBar}>
-          <View style={[styles.spendingBar, {flex: 1}]} />
+          <View style={[styles.spendingBar, { flex: 1 }]} />
         </View>
       </View>
       <View style={styles.wallet}>
@@ -75,14 +146,14 @@ const HomeScreen: React.FC<HomeProps> = ({navigation}) => {
             {showBalance ? formatCurrency(getCurrentBalance) : '************'}
           </Text>
         </View>
-        <TouchableOpacity 
-          style={styles.eyeIconContainer} 
+        <TouchableOpacity
+          style={styles.eyeIconContainer}
           onPress={toggleBalanceVisibility}
         >
-          {showBalance ? 
-            <FontAwesomeIcon icon={faEye} size={35} color={'#201c5c'}/>
-             :  
-            <FontAwesomeIcon icon={faEyeSlash} size={35} color={'#201c5c'}/>
+          {showBalance ?
+            <FontAwesomeIcon icon={faEye} size={35} color={'#201c5c'} />
+            :
+            <FontAwesomeIcon icon={faEyeSlash} size={35} color={'#201c5c'} />
           }
         </TouchableOpacity>
       </View>
@@ -104,6 +175,14 @@ const HomeScreen: React.FC<HomeProps> = ({navigation}) => {
             />
           </View>
         </View>
+      </View>
+      <View style={styles.topSpendingContainer}>
+        <Text style={styles.heading}>Top Spending This Month</Text>
+        <FlatList
+          data={topThreeSpending}
+          renderItem={renderTopSpending}
+          keyExtractor={item => item.categoryName}
+        />
       </View>
     </View>
   );
@@ -178,7 +257,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   budgetingContainer: {
-    marginTop: 30,
+    marginTop: 20,
     height: '21%',
   },
   budgeting: {
@@ -210,7 +289,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 15,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     width: '50%',
@@ -241,6 +320,40 @@ const styles = StyleSheet.create({
   eyeIcon: {
     width: 35,
     height: 20,
+  },
+  topSpendingContainer: {
+    marginTop: 60,
+    height: '21%',
+  },
+  topSpendingItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    paddingHorizontal: 15,
+    marginTop: 20,
+  },
+  spendingSectionLeft: {
+    flex: 1,
+    marginLeft: 20,
+  },
+  transactionDate: {
+    fontSize: 12,
+    color: '#888',
+    marginBottom: 4,
+  },
+  transactionDescription: {
+    fontSize: 18,
+    fontWeight: '500',
+    fontFamily: 'Montserrat-SemiBold',
+    color: '#201c5c',
+  },
+  spendingAmount: {
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Montserrat-SemiBold',
+    color: '#201c5c',
   },
 });
 
