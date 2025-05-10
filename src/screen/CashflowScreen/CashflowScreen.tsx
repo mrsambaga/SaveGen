@@ -24,48 +24,6 @@ const CashflowScreen: React.FC<CashflowProps> = ({ navigation }) => {
     getTransactions();
   }, []);
 
-  const chartData = useMemo(() => {
-    const months = Array.from({ length: 6 }, (_, i) => {
-      const date = new Date();
-      date.setMonth(date.getMonth() - i);
-      return date.toLocaleDateString('en-US', { month: 'short' });
-    }).reverse();
-
-    const incomeData = Array(6).fill(0);
-    const spendingData = Array(6).fill(0);
-
-    transactions.forEach(transaction => {
-      const date = new Date(transaction.date);
-      const monthIndex = months.indexOf(date.toLocaleDateString('en-US', { month: 'short' }));
-
-      if (monthIndex !== -1) {
-        if (transaction.transaction_type === 'credit') {
-          incomeData[monthIndex] += transaction.amount;
-        }
-        if (transaction.transaction_type === 'debit') {
-          spendingData[monthIndex] += transaction.amount;
-        }
-      }
-    });
-
-    return {
-      labels: months,
-      datasets: [
-        {
-          data: incomeData,
-          color: (opacity = 1) => `rgba(46, 204, 113, ${opacity})`,
-          strokeWidth: 2,
-        },
-        {
-          data: spendingData,
-          color: (opacity = 1) => `rgba(231, 76, 60, ${opacity})`,
-          strokeWidth: 2,
-        },
-      ],
-      legend: ['Income', 'Spending'],
-    };
-  }, [transactions]);
-
   const groupedTransactions = useMemo(() => {
     if (!Array.isArray(transactions) || transactions.length === 0) {
       return [];
@@ -124,22 +82,6 @@ const CashflowScreen: React.FC<CashflowProps> = ({ navigation }) => {
       day: 'numeric',
       year: 'numeric',
     });
-  };
-
-  const chartConfig = {
-    backgroundGradientFrom: '#fff',
-    backgroundGradientTo: '#fff',
-    decimalPlaces: 0,
-    color: (opacity = 1) => `rgba(46, 204, 113, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(32, 28, 92, ${opacity})`,
-    style: {
-      borderRadius: 16,
-    },
-    barPercentage: 0.4,
-    propsForBackgroundLines: {
-      strokeWidth: 0,
-    },
-    formatYLabel: (value: string) => formatCurrency(Number(value)),
   };
 
   return (
