@@ -1,9 +1,9 @@
 import { Image, StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
-import { FlatList, Text } from 'react-native-gesture-handler';
+import { Text } from 'react-native-gesture-handler';
 import Button from '../../components/Button';
-import { HomeProps, SpendingChartProps } from '../../constants/props';
+import { HomeProps, TopSpendingProps } from '../../constants/props';
 import { useMemo, useState } from 'react';
-import { formatCurrency, shortenText } from '../../utils/Formatter';
+import { formatCurrency } from '../../utils/Formatter';
 import { Transaction } from '../../constants/types';
 import { useTransactions } from '../../context/TransactionContext';
 import {
@@ -99,15 +99,6 @@ const HomeScreen: React.FC<HomeProps> = ({ navigation }) => {
       year: 'numeric',
     });
   };
-
-  type TopSpendingItem = {
-    categoryName: string,
-    totalAmount: number,
-  }
-
-  type TopSpendingProps = {
-    item: TopSpendingItem
-  }
 
   const TopSpending: React.FC<TopSpendingProps> = ({ item }) => {
     return (

@@ -1,7 +1,7 @@
-import {StackNavigationProp} from '@react-navigation/stack';
-import {CashFlowStackParamList, RootStackParamList} from './navigation';
-import {RouteProp} from '@react-navigation/native';
-import {Transaction} from './types';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { CashFlowStackParamList, RootStackParamList } from './navigation';
+import { RouteProp } from '@react-navigation/native';
+import { TopSpendingItem, Transaction } from './types';
 
 export type CashflowProps = {
   navigation: StackNavigationProp<CashFlowStackParamList, 'Transactions'>;
@@ -17,7 +17,7 @@ type OverviewRouteParams = {
 };
 
 export type OverviewProps = {
-  route: RouteProp<{Overview: OverviewRouteParams}, 'Overview'>;
+  route: RouteProp<{ Overview: OverviewRouteParams }, 'Overview'>;
 };
 
 export type HomeProps = {
@@ -37,3 +37,7 @@ export type CategoryIconsProps = {
   size?: number;
   color?: string;
 };
+
+export type TopSpendingProps = {
+  item: TopSpendingItem
+}

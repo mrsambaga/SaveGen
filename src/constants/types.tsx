@@ -15,6 +15,11 @@ export type ChartDataItem = {
   legendFontSize: number;
 };
 
+export type TopSpendingItem = {
+  categoryName: string,
+  totalAmount: number,
+}
+
 export type IconCategoryName =
   | 'salary'
   | 'groceries'
