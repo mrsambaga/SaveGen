@@ -107,7 +107,7 @@ const HomeScreen: React.FC<HomeProps> = ({ navigation }) => {
           <CategoryIcons iconName={item.categoryName} />
         </View>
         <View style={styles.spendingSectionLeft}>
-          <Text style={styles.transactionDescription}>{categoryIconLabelMap[item.categoryName]}</Text>
+          <Text style={styles.spendingLabel}>{categoryIconLabelMap[item.categoryName]}</Text>
         </View>
         <Text
           style={styles.spendingAmount}>
@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
     color: '#888',
     marginBottom: 4,
   },
-  transactionDescription: {
+  spendingLabel: {
     fontSize: 18,
     fontWeight: '500',
     fontFamily: 'Montserrat-SemiBold',
