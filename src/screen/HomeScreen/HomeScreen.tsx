@@ -76,15 +76,6 @@ const HomeScreen: React.FC<HomeProps> = ({ navigation }) => {
     return categoriesArray.sort((a, b) => b.totalAmount - a.totalAmount).slice(0, 3);
   }, [transactions]);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
-
   const TopSpending: React.FC<TopSpendingProps> = ({ item }) => {
     return (
       <View style={styles.topSpendingItem}>
@@ -317,7 +308,6 @@ const styles = StyleSheet.create({
   topSpendingContainer: {
     marginTop: 60,
     marginBottom: 50,
-    height: '21%',
   },
   topSpendingItem: {
     flexDirection: 'row',
@@ -331,11 +321,6 @@ const styles = StyleSheet.create({
   spendingSectionLeft: {
     flex: 1,
     marginLeft: 20,
-  },
-  transactionDate: {
-    fontSize: 12,
-    color: '#888',
-    marginBottom: 4,
   },
   spendingLabel: {
     fontSize: 18,
