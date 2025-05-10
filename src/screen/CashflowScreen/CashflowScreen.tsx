@@ -1,29 +1,14 @@
-import React, {useState, useMemo, useEffect} from 'react';
-import {View, Text, StyleSheet, SectionList} from 'react-native';
-import {Transaction} from '../../constants/types';
-import {CashflowProps} from '../../constants/props';
+import React, { useState, useMemo, useEffect } from 'react';
+import { View, Text, StyleSheet, SectionList } from 'react-native';
+import { Transaction } from '../../constants/types';
+import { CashflowProps } from '../../constants/props';
 import CategoryIcons from '../../components/CategoryIcons';
 import { formatCurrency, shortenText } from '../../utils/Formatter';
 import SpendingChart from './SpendingChart';
 import { fetchTransactions } from '../../service/transactionService';
+import { categoryIconLabelMap } from '../../constants/const';
 
-const categoryIconLabelMap: Record<string, string> = {
-  'foodanddrink': 'Food & Drink',
-  'groceries': 'Groceries',
-  'salary': 'Salary',
-  'bills': 'Bills',
-  'rent': 'Rent',
-  'travel': 'Travel',
-  'transportation': 'Transportation',
-  'shopping': 'Shopping',
-  'education': 'Education',
-  'family': 'Family',
-  'entertainment': 'Entertainment',
-  'health': 'Health',
-  'other': 'Other',
-};
-
-const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
+const CashflowScreen: React.FC<CashflowProps> = ({ navigation }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {
@@ -35,7 +20,7 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
         setTransactions([]);
       }
     };
-    
+
     getTransactions();
   }, []);
 
@@ -52,11 +37,11 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
     transactions.forEach(transaction => {
       const date = new Date(transaction.date);
       const monthIndex = months.indexOf(date.toLocaleDateString('en-US', { month: 'short' }));
-      
+
       if (monthIndex !== -1) {
         if (transaction.transaction_type === 'credit') {
           incomeData[monthIndex] += transaction.amount;
-        } 
+        }
         if (transaction.transaction_type === 'debit') {
           spendingData[monthIndex] += transaction.amount;
         }
@@ -85,11 +70,11 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
     if (!Array.isArray(transactions) || transactions.length === 0) {
       return [];
     }
-    
+
     const grouped = transactions.reverse().reduce((acc, transaction) => {
       const date = new Date(transaction.date);
       const monthYear = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-      
+
       if (!acc[monthYear]) {
         acc[monthYear] = [];
       }
@@ -103,13 +88,13 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
     }));
   }, [transactions]);
 
-  const renderSectionHeader = ({section: {title}}: {section: {title: string}}) => (
+  const renderSectionHeader = ({ section: { title } }: { section: { title: string } }) => (
     <View style={styles.sectionHeader}>
       <Text style={styles.sectionHeaderText}>{title}</Text>
     </View>
   );
 
-  const renderTransactionItem = ({item}: {item: Transaction}) => (
+  const renderTransactionItem = ({ item }: { item: Transaction }) => (
     <View style={styles.transactionItem}>
       <View>
         <CategoryIcons iconName={item.transaction_category} />
@@ -127,7 +112,7 @@ const CashflowScreen: React.FC<CashflowProps> = ({navigation}) => {
           item.transaction_type === 'debit' ? styles.expenseText : styles.incomeText,
         ]}>
         {item.transaction_type === 'debit' ? '-' : '+'}
-        {formatCurrency(item.amount)} 
+        {formatCurrency(item.amount)}
       </Text>
     </View>
   );
@@ -223,7 +208,7 @@ const styles = StyleSheet.create({
     margin: 15,
     marginBottom: 0,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
