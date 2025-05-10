@@ -1,7 +1,7 @@
-import { Image, StyleSheet, View, TouchableOpacity } from 'react-native';
+import { Image, StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
 import { FlatList, Text } from 'react-native-gesture-handler';
 import Button from '../../components/Button';
-import { HomeProps } from '../../constants/props';
+import { HomeProps, SpendingChartProps } from '../../constants/props';
 import { useMemo, useState } from 'react';
 import { formatCurrency, shortenText } from '../../utils/Formatter';
 import { Transaction } from '../../constants/types';
@@ -100,7 +100,16 @@ const HomeScreen: React.FC<HomeProps> = ({ navigation }) => {
     });
   };
 
-  const renderTopSpending = ({ item }: { item: { categoryName: string, totalAmount: number } }) => {
+  type TopSpendingItem = {
+    categoryName: string,
+    totalAmount: number,
+  }
+
+  type TopSpendingProps = {
+    item: TopSpendingItem
+  }
+
+  const TopSpending: React.FC<TopSpendingProps> = ({ item }) => {
     return (
       <View style={styles.topSpendingItem}>
         <View>
@@ -118,7 +127,10 @@ const HomeScreen: React.FC<HomeProps> = ({ navigation }) => {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
       <Text style={styles.title}>Welcome back, Sam!</Text>
       <View style={styles.card}>
         <View style={styles.topCard}>
@@ -178,13 +190,18 @@ const HomeScreen: React.FC<HomeProps> = ({ navigation }) => {
       </View>
       <View style={styles.topSpendingContainer}>
         <Text style={styles.heading}>Top Spending This Month</Text>
-        <FlatList
-          data={topThreeSpending}
-          renderItem={renderTopSpending}
-          keyExtractor={item => item.categoryName}
-        />
+        {topThreeSpending && topThreeSpending.length > 0 ? (
+          topThreeSpending.map((spendingItem) => (
+            <TopSpending
+              key={spendingItem.categoryName}
+              item={spendingItem}
+            />
+          ))
+        ) : (
+          <Text style={styles.heading}>No spending data for this month yet.</Text>
+        )}
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -323,6 +340,7 @@ const styles = StyleSheet.create({
   },
   topSpendingContainer: {
     marginTop: 60,
+    marginBottom: 50,
     height: '21%',
   },
   topSpendingItem: {
