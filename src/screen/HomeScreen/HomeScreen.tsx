@@ -6,6 +6,11 @@ import { useMemo, useState } from 'react';
 import { formatCurrency } from '../../utils/Formatter';
 import { Transaction } from '../../constants/types';
 import { useTransactions } from '../../context/TransactionContext';
+import {
+  faEye,
+  faEyeSlash,
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
 const HomeScreen: React.FC<HomeProps> = ({navigation}) => {
   const {transactions} = useTransactions();
@@ -74,10 +79,11 @@ const HomeScreen: React.FC<HomeProps> = ({navigation}) => {
           style={styles.eyeIconContainer} 
           onPress={toggleBalanceVisibility}
         >
-          <Image
-            source={require('../../../assets/icons/eye.png')}
-            style={styles.eyeIcon}
-          />
+          {showBalance ? 
+            <FontAwesomeIcon icon={faEye} size={35} color={'#201c5c'}/>
+             :  
+            <FontAwesomeIcon icon={faEyeSlash} size={35} color={'#201c5c'}/>
+          }
         </TouchableOpacity>
       </View>
       <View style={styles.budgetingContainer}>
