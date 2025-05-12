@@ -1,20 +1,43 @@
-import React, {useMemo} from 'react';
-import {View, Text, StyleSheet, Dimensions, ScrollView} from 'react-native';
-import {PieChart} from 'react-native-chart-kit';
-import {ChartDataItem} from '../../constants/types';
-import {OverviewProps} from '../../constants/props';
+import React, { useMemo, useState } from 'react';
+import { View, Text, StyleSheet, Dimensions, ScrollView, TouchableOpacity } from 'react-native';
+import { PieChart } from 'react-native-chart-kit';
+import { ChartDataItem } from '../../constants/types';
+import { OverviewProps } from '../../constants/props';
 import CategoryIcons from '../../components/CategoryIcons';
 import { formatCurrency } from '../../utils/Formatter';
 
 const screenWidth = Dimensions.get('window').width;
 
-const OverviewScreen: React.FC<OverviewProps> = ({route}) => {
+const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
+  const [selectedTimeRange, setSelectedTimeRange] = useState<'1m' | '3m' | '6m' | '12m'>('1m');
+  const [selectedMonth, setSelectedMonth] = useState<Date>(new Date());
+
   const transactions = useMemo(() => {
     return route.params?.transactions || [];
   }, [route.params?.transactions]);
 
+  const filteredTransactions = useMemo(() => {
+    const now = new Date();
+    const startDate = new Date();
+
+    if (selectedTimeRange === '1m') {
+      startDate.setMonth(now.getMonth() - 1);
+    } else if (selectedTimeRange === '3m') {
+      startDate.setMonth(now.getMonth() - 3);
+    } else if (selectedTimeRange === '6m') {
+      startDate.setMonth(now.getMonth() - 6);
+    } else if (selectedTimeRange === '12m') {
+      startDate.setMonth(now.getMonth() - 12);
+    }
+
+    return transactions.filter(transaction => {
+      const transactionDate = new Date(transaction.date);
+      return transactionDate >= startDate && transactionDate <= now;
+    });
+  }, [transactions, selectedTimeRange]);
+
   const spendingByCategory = useMemo<ChartDataItem[]>(() => {
-    const expenseTransactions = transactions.filter(
+    const expenseTransactions = filteredTransactions.filter(
       transaction => transaction.transaction_type === 'debit',
     );
 
@@ -53,7 +76,7 @@ const OverviewScreen: React.FC<OverviewProps> = ({route}) => {
         legendFontSize: 12,
       };
     });
-  }, [transactions]);
+  }, [filteredTransactions]);
 
   const totalSpending = useMemo<number>(() => {
     return spendingByCategory.reduce((sum, item) => sum + item.amount, 0);
@@ -70,8 +93,28 @@ const OverviewScreen: React.FC<OverviewProps> = ({route}) => {
     },
   };
 
+  const getTimeRangeText = () => {
+    const endDate = selectedMonth.toLocaleString('default', { month: 'long', year: 'numeric' });
+    const startDate = new Date(selectedMonth);
+
+    if (selectedTimeRange === '3m') {
+      startDate.setMonth(startDate.getMonth() - 3);
+      return startDate.toLocaleString('default', { month: 'long', year: 'numeric' }) + ' - ' + endDate;
+    }
+    if (selectedTimeRange === '6m') {
+      startDate.setMonth(startDate.getMonth() - 6);
+      return startDate.toLocaleString('default', { month: 'long', year: 'numeric' }) + ' - ' + endDate;
+    }
+    if (selectedTimeRange === '12m') {
+      startDate.setMonth(startDate.getMonth() - 12);
+      return startDate.toLocaleString('default', { month: 'long', year: 'numeric' }) + ' - ' + endDate;
+    }
+
+    return endDate
+  };
+
   return (
-    <ScrollView 
+    <ScrollView
       style={styles.container}
       contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator={false}
@@ -81,6 +124,46 @@ const OverviewScreen: React.FC<OverviewProps> = ({route}) => {
         <Text style={styles.subtitle}>
           Total Spending: {formatCurrency(totalSpending)}
         </Text>
+      </View>
+
+      <View style={styles.timeRangeContainer}>
+        <View style={styles.timeRangeButtons}>
+          <TouchableOpacity
+            style={[styles.timeRangeButton, selectedTimeRange === '1m' && styles.selectedTimeRange]}
+            onPress={() => setSelectedTimeRange('1m')}
+          >
+            <Text style={[styles.timeRangeText, selectedTimeRange === '1m' && styles.selectedTimeRangeText]}>1M</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.timeRangeButton, selectedTimeRange === '3m' && styles.selectedTimeRange]}
+            onPress={() => setSelectedTimeRange('3m')}
+          >
+            <Text style={[styles.timeRangeText, selectedTimeRange === '3m' && styles.selectedTimeRangeText]}>3M</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.timeRangeButton, selectedTimeRange === '6m' && styles.selectedTimeRange]}
+            onPress={() => setSelectedTimeRange('6m')}
+          >
+            <Text style={[styles.timeRangeText, selectedTimeRange === '6m' && styles.selectedTimeRangeText]}>6M</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.timeRangeButton, selectedTimeRange === '12m' && styles.selectedTimeRange]}
+            onPress={() => setSelectedTimeRange('12m')}
+          >
+            <Text style={[styles.timeRangeText, selectedTimeRange === '12m' && styles.selectedTimeRangeText]}>12M</Text>
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity
+          style={styles.monthButton}
+          onPress={() => {
+            // TODO: Implement month picker
+            // This would typically open a date picker modal
+          }}
+        >
+          <Text style={styles.monthButtonText}>
+            {getTimeRangeText()}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {spendingByCategory.length > 0 ? (
@@ -102,9 +185,9 @@ const OverviewScreen: React.FC<OverviewProps> = ({route}) => {
           <View style={styles.legendContainer}>
             {spendingByCategory.map((item, index) => (
               <View key={index} style={styles.legendItem}>
-                <CategoryIcons 
-                  iconName={item.name.toLowerCase()} 
-                  size={16} 
+                <CategoryIcons
+                  iconName={item.name.toLowerCase()}
+                  size={16}
                   color={item.color}
                 />
                 <Text style={styles.legendText}>
@@ -124,9 +207,9 @@ const OverviewScreen: React.FC<OverviewProps> = ({route}) => {
         <Text style={styles.categoriesTitle}>Expenses by Category</Text>
         {spendingByCategory.map((item, index) => (
           <View key={index} style={styles.categoryItem}>
-            <CategoryIcons 
-              iconName={item.name.toLowerCase()} 
-              size={20} 
+            <CategoryIcons
+              iconName={item.name.toLowerCase()}
+              size={20}
               color={item.color}
             />
             <Text style={styles.categoryName}>{item.name}</Text>
@@ -169,7 +252,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
@@ -192,7 +275,7 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 8,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 1},
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
@@ -221,7 +304,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
@@ -253,6 +336,56 @@ const styles = StyleSheet.create({
     color: '#201c5c',
     fontFamily: 'Montserrat-SemiBold',
     textAlign: 'right',
+  },
+  timeRangeContainer: {
+    marginBottom: 20,
+  },
+  timeRangeButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  timeRangeButton: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    marginHorizontal: 4,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  selectedTimeRange: {
+    backgroundColor: '#201c5c',
+  },
+  timeRangeText: {
+    fontSize: 14,
+    color: '#201c5c',
+    fontFamily: 'Montserrat-SemiBold',
+  },
+  selectedTimeRangeText: {
+    color: '#fff',
+  },
+  monthButton: {
+    backgroundColor: '#fff',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  monthButtonText: {
+    fontSize: 14,
+    color: '#201c5c',
+    fontFamily: 'Montserrat-SemiBold',
   },
 });
 
