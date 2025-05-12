@@ -1,16 +1,23 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { PieChart } from 'react-native-chart-kit';
 import { ChartDataItem } from '../../constants/types';
 import { OverviewProps } from '../../constants/props';
 import CategoryIcons from '../../components/CategoryIcons';
 import { formatCurrency } from '../../utils/Formatter';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const screenWidth = Dimensions.get('window').width;
 
+type TimeRangeType = 'monthly' | 'yearly' | 'custom';
+
 const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
-  const [selectedTimeRange, setSelectedTimeRange] = useState<'1m' | '3m' | '6m' | '12m'>('1m');
+  const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeType>('monthly');
   const [selectedMonth, setSelectedMonth] = useState<Date>(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isStartDate, setIsStartDate] = useState(true);
+  const [customStartDate, setCustomStartDate] = useState<Date>(new Date());
+  const [customEndDate, setCustomEndDate] = useState<Date>(new Date());
 
   const transactions = useMemo(() => {
     return route.params?.transactions || [];
@@ -20,21 +27,22 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
     const now = new Date();
     const startDate = new Date();
 
-    if (selectedTimeRange === '1m') {
+    if (selectedTimeRange === 'monthly') {
       startDate.setMonth(now.getMonth() - 1);
-    } else if (selectedTimeRange === '3m') {
-      startDate.setMonth(now.getMonth() - 3);
-    } else if (selectedTimeRange === '6m') {
-      startDate.setMonth(now.getMonth() - 6);
-    } else if (selectedTimeRange === '12m') {
-      startDate.setMonth(now.getMonth() - 12);
+    } else if (selectedTimeRange === 'yearly') {
+      startDate.setFullYear(now.getFullYear() - 1);
+    } else if (selectedTimeRange === 'custom') {
+      return transactions.filter(transaction => {
+        const transactionDate = new Date(transaction.date);
+        return transactionDate >= customStartDate && transactionDate <= customEndDate;
+      });
     }
 
     return transactions.filter(transaction => {
       const transactionDate = new Date(transaction.date);
       return transactionDate >= startDate && transactionDate <= now;
     });
-  }, [transactions, selectedTimeRange]);
+  }, [transactions, selectedTimeRange, customStartDate, customEndDate]);
 
   const spendingByCategory = useMemo<ChartDataItem[]>(() => {
     const expenseTransactions = filteredTransactions.filter(
@@ -94,23 +102,29 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
   };
 
   const getTimeRangeText = () => {
-    const endDate = selectedMonth.toLocaleString('default', { month: 'long', year: 'numeric' });
-    const startDate = new Date(selectedMonth);
+    if (selectedTimeRange === 'monthly') {
+      return selectedMonth.toLocaleString('default', { month: 'long', year: 'numeric' });
+    } else if (selectedTimeRange === 'yearly') {
+      return selectedMonth.toLocaleString('default', { year: 'numeric' });
+    } else {
+      return `${customStartDate.toLocaleString('default', { month: 'short', year: 'numeric' })} - ${customEndDate.toLocaleString('default', { month: 'short', year: 'numeric' })}`;
+    }
+  };
 
-    if (selectedTimeRange === '3m') {
-      startDate.setMonth(startDate.getMonth() - 3);
-      return startDate.toLocaleString('default', { month: 'long', year: 'numeric' }) + ' - ' + endDate;
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      if (isStartDate) {
+        setCustomStartDate(selectedDate);
+      } else {
+        setCustomEndDate(selectedDate);
+      }
     }
-    if (selectedTimeRange === '6m') {
-      startDate.setMonth(startDate.getMonth() - 6);
-      return startDate.toLocaleString('default', { month: 'long', year: 'numeric' }) + ' - ' + endDate;
-    }
-    if (selectedTimeRange === '12m') {
-      startDate.setMonth(startDate.getMonth() - 12);
-      return startDate.toLocaleString('default', { month: 'long', year: 'numeric' }) + ' - ' + endDate;
-    }
+  };
 
-    return endDate
+  const showDatePickerModal = (isStart: boolean) => {
+    setIsStartDate(isStart);
+    setShowDatePicker(true);
   };
 
   return (
@@ -129,42 +143,69 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
       <View style={styles.timeRangeContainer}>
         <View style={styles.timeRangeButtons}>
           <TouchableOpacity
-            style={[styles.timeRangeButton, selectedTimeRange === '1m' && styles.selectedTimeRange]}
-            onPress={() => setSelectedTimeRange('1m')}
+            style={[styles.timeRangeButton, selectedTimeRange === 'monthly' && styles.selectedTimeRange]}
+            onPress={() => setSelectedTimeRange('monthly')}
           >
-            <Text style={[styles.timeRangeText, selectedTimeRange === '1m' && styles.selectedTimeRangeText]}>1M</Text>
+            <Text style={[styles.timeRangeText, selectedTimeRange === 'monthly' && styles.selectedTimeRangeText]}>Monthly</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.timeRangeButton, selectedTimeRange === '3m' && styles.selectedTimeRange]}
-            onPress={() => setSelectedTimeRange('3m')}
+            style={[styles.timeRangeButton, selectedTimeRange === 'yearly' && styles.selectedTimeRange]}
+            onPress={() => setSelectedTimeRange('yearly')}
           >
-            <Text style={[styles.timeRangeText, selectedTimeRange === '3m' && styles.selectedTimeRangeText]}>3M</Text>
+            <Text style={[styles.timeRangeText, selectedTimeRange === 'yearly' && styles.selectedTimeRangeText]}>Yearly</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.timeRangeButton, selectedTimeRange === '6m' && styles.selectedTimeRange]}
-            onPress={() => setSelectedTimeRange('6m')}
+            style={[styles.timeRangeButton, selectedTimeRange === 'custom' && styles.selectedTimeRange]}
+            onPress={() => setSelectedTimeRange('custom')}
           >
-            <Text style={[styles.timeRangeText, selectedTimeRange === '6m' && styles.selectedTimeRangeText]}>6M</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.timeRangeButton, selectedTimeRange === '12m' && styles.selectedTimeRange]}
-            onPress={() => setSelectedTimeRange('12m')}
-          >
-            <Text style={[styles.timeRangeText, selectedTimeRange === '12m' && styles.selectedTimeRangeText]}>12M</Text>
+            <Text style={[styles.timeRangeText, selectedTimeRange === 'custom' && styles.selectedTimeRangeText]}>Custom</Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          style={styles.monthButton}
-          onPress={() => {
-            // TODO: Implement month picker
-            // This would typically open a date picker modal
-          }}
-        >
-          <Text style={styles.monthButtonText}>
-            {getTimeRangeText()}
-          </Text>
-        </TouchableOpacity>
+
+        {selectedTimeRange === 'custom' ? (
+          <View style={styles.customDateContainer}>
+            <TouchableOpacity
+              style={styles.dateButton}
+              onPress={() => showDatePickerModal(true)}
+            >
+              <Text style={styles.dateButtonText}>
+                From: {customStartDate.toLocaleString('default', { month: 'short', year: 'numeric' })}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.dateButton}
+              onPress={() => showDatePickerModal(false)}
+            >
+              <Text style={styles.dateButtonText}>
+                To: {customEndDate.toLocaleString('default', { month: 'short', year: 'numeric' })}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={styles.monthButton}
+            onPress={() => {
+              setIsStartDate(true);
+              setShowDatePicker(true);
+            }}
+          >
+            <Text style={styles.monthButtonText}>
+              {getTimeRangeText()}
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
+
+      {showDatePicker && (
+        <DateTimePicker
+          value={isStartDate ? customStartDate : customEndDate}
+          mode="date"
+          display="default"
+          onChange={handleDateChange}
+          maximumDate={new Date()}
+          minimumDate={selectedTimeRange === 'custom' && !isStartDate ? customStartDate : undefined}
+        />
+      )}
 
       {spendingByCategory.length > 0 ? (
         <View style={styles.chartContainer}>
@@ -383,6 +424,30 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   monthButtonText: {
+    fontSize: 14,
+    color: '#201c5c',
+    fontFamily: 'Montserrat-SemiBold',
+  },
+  customDateContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  dateButton: {
+    flex: 1,
+    backgroundColor: '#fff',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginHorizontal: 4,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  dateButtonText: {
     fontSize: 14,
     color: '#201c5c',
     fontFamily: 'Montserrat-SemiBold',
