@@ -5,7 +5,7 @@ import { ChartDataItem } from '../../constants/types';
 import { OverviewProps } from '../../constants/props';
 import CategoryIcons from '../../components/CategoryIcons';
 import { formatCurrency } from '../../utils/Formatter';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { Picker } from '@react-native-picker/picker';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -14,23 +14,40 @@ type TimeRangeType = 'monthly' | 'yearly' | 'custom';
 const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
   const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeType>('monthly');
   const [selectedMonth, setSelectedMonth] = useState<Date>(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showMonthPicker, setShowMonthPicker] = useState(false);
+  const [showYearPicker, setShowYearPicker] = useState(false);
+  const [showCustomPicker, setShowCustomPicker] = useState(false);
   const [isStartDate, setIsStartDate] = useState(true);
   const [customStartDate, setCustomStartDate] = useState<Date>(new Date());
   const [customEndDate, setCustomEndDate] = useState<Date>(new Date());
+
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 6 }, (_, i) => currentYear - i);
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
 
   const transactions = useMemo(() => {
     return route.params?.transactions || [];
   }, [route.params?.transactions]);
 
   const filteredTransactions = useMemo(() => {
-    const now = new Date();
-    const startDate = new Date();
-
     if (selectedTimeRange === 'monthly') {
-      startDate.setMonth(now.getMonth() - 1);
+      const endDate = new Date(selectedMonth);
+      endDate.setMonth(endDate.getMonth() + 1);
+      return transactions.filter(transaction => {
+        const transactionDate = new Date(transaction.date);
+        return transactionDate >= selectedMonth && transactionDate < endDate;
+      });
     } else if (selectedTimeRange === 'yearly') {
-      startDate.setFullYear(now.getFullYear() - 1);
+      customStartDate.setFullYear(selectedMonth.getFullYear());
+      const endDate = new Date(customStartDate);
+      endDate.setFullYear(endDate.getFullYear() + 1);
+      return transactions.filter(transaction => {
+        const transactionDate = new Date(transaction.date);
+        return transactionDate >= customStartDate && transactionDate < endDate;
+      });
     } else if (selectedTimeRange === 'custom') {
       return transactions.filter(transaction => {
         const transactionDate = new Date(transaction.date);
@@ -38,11 +55,8 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
       });
     }
 
-    return transactions.filter(transaction => {
-      const transactionDate = new Date(transaction.date);
-      return transactionDate >= startDate && transactionDate <= now;
-    });
-  }, [transactions, selectedTimeRange, customStartDate, customEndDate]);
+    return transactions;
+  }, [transactions, selectedTimeRange, selectedMonth, customStartDate, customEndDate]);
 
   const spendingByCategory = useMemo<ChartDataItem[]>(() => {
     const expenseTransactions = filteredTransactions.filter(
@@ -111,21 +125,157 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
     }
   };
 
-  const handleDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(false);
-    if (selectedDate) {
-      if (isStartDate) {
-        setCustomStartDate(selectedDate);
-      } else {
-        setCustomEndDate(selectedDate);
-      }
+  const handleMonthChange = (month: string) => {
+    const newDate = new Date(selectedMonth);
+    newDate.setMonth(months.indexOf(month));
+    setSelectedMonth(newDate);
+  };
+
+  const handleYearChange = (year: number) => {
+    const newDate = new Date(selectedMonth);
+    newDate.setFullYear(year);
+    setSelectedMonth(newDate);
+  };
+
+  const handleCustomMonthChange = (month: string) => {
+    const targetDate = isStartDate ? customStartDate : customEndDate;
+    const newDate = new Date(targetDate);
+    newDate.setMonth(months.indexOf(month));
+    if (isStartDate) {
+      setCustomStartDate(newDate);
+    } else {
+      setCustomEndDate(newDate);
     }
   };
 
-  const showDatePickerModal = (isStart: boolean) => {
-    setIsStartDate(isStart);
-    setShowDatePicker(true);
+  const handleCustomYearChange = (year: number) => {
+    const targetDate = isStartDate ? customStartDate : customEndDate;
+    const newDate = new Date(targetDate);
+    newDate.setFullYear(year);
+    if (isStartDate) {
+      setCustomStartDate(newDate);
+    } else {
+      setCustomEndDate(newDate);
+    }
   };
+
+  const renderMonthPicker = () => (
+    <Modal
+      visible={showMonthPicker}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={() => setShowMonthPicker(false)}
+    >
+      <View style={styles.modalContainer}>
+        <View style={styles.pickerContainer}>
+          <View style={styles.pickerHeader}>
+            <Text style={styles.pickerTitle}>Select Month</Text>
+            <TouchableOpacity onPress={() => setShowMonthPicker(false)}>
+              <Text style={styles.pickerCloseButton}>Done</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.customPickerContent}>
+            <View style={styles.pickerSection}>
+              <Text style={styles.pickerLabel}>Month</Text>
+              <Picker
+                selectedValue={months[selectedMonth.getMonth()]}
+                onValueChange={handleMonthChange}
+              >
+                {months.map((month) => (
+                  <Picker.Item key={month} label={month} value={month} />
+                ))}
+              </Picker>
+            </View>
+            <View style={styles.pickerSection}>
+              <Text style={styles.pickerLabel}>Year</Text>
+              <Picker
+                selectedValue={selectedMonth.getFullYear()}
+                onValueChange={handleYearChange}
+              >
+                {years.map((year) => (
+                  <Picker.Item key={year} label={year.toString()} value={year} />
+                ))}
+              </Picker>
+            </View>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+
+  const renderYearPicker = () => (
+    <Modal
+      visible={showYearPicker}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={() => setShowYearPicker(false)}
+    >
+      <View style={styles.modalContainer}>
+        <View style={styles.pickerContainer}>
+          <View style={styles.pickerHeader}>
+            <Text style={styles.pickerTitle}>Select Year</Text>
+            <TouchableOpacity onPress={() => setShowYearPicker(false)}>
+              <Text style={styles.pickerCloseButton}>Done</Text>
+            </TouchableOpacity>
+          </View>
+          <Picker
+            selectedValue={selectedMonth.getFullYear()}
+            onValueChange={handleYearChange}
+          >
+            {years.map((year) => (
+              <Picker.Item key={year} label={year.toString()} value={year} />
+            ))}
+          </Picker>
+        </View>
+      </View>
+    </Modal>
+  );
+
+  const renderCustomPicker = () => (
+    <Modal
+      visible={showCustomPicker}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={() => setShowCustomPicker(false)}
+    >
+      <View style={styles.modalContainer}>
+        <View style={styles.pickerContainer}>
+          <View style={styles.pickerHeader}>
+            <Text style={styles.pickerTitle}>
+              Select {isStartDate ? 'Start' : 'End'} Date
+            </Text>
+            <TouchableOpacity onPress={() => setShowCustomPicker(false)}>
+              <Text style={styles.pickerCloseButton}>Done</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.customPickerContent}>
+            <View style={styles.pickerSection}>
+              <Text style={styles.pickerLabel}>Month</Text>
+              <Picker
+                selectedValue={months[isStartDate ? customStartDate.getMonth() : customEndDate.getMonth()]}
+                onValueChange={handleCustomMonthChange}
+              >
+                {months.map((month) => (
+                  <Picker.Item key={month} label={month} value={month} />
+                ))}
+              </Picker>
+            </View>
+            <View style={styles.pickerSection}>
+              <Text style={styles.pickerLabel}>Year</Text>
+              <Picker
+                selectedValue={isStartDate ? customStartDate.getFullYear() : customEndDate.getFullYear()}
+                onValueChange={handleCustomYearChange}
+              >
+                {years.map((year) => (
+                  <Picker.Item key={year} label={year.toString()} value={year} />
+                ))}
+              </Picker>
+            </View>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
 
   return (
     <ScrollView
@@ -166,7 +316,10 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
           <View style={styles.customDateContainer}>
             <TouchableOpacity
               style={styles.dateButton}
-              onPress={() => showDatePickerModal(true)}
+              onPress={() => {
+                setIsStartDate(true);
+                setShowCustomPicker(true);
+              }}
             >
               <Text style={styles.dateButtonText}>
                 From: {customStartDate.toLocaleString('default', { month: 'short', year: 'numeric' })}
@@ -174,7 +327,10 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.dateButton}
-              onPress={() => showDatePickerModal(false)}
+              onPress={() => {
+                setIsStartDate(false);
+                setShowCustomPicker(true);
+              }}
             >
               <Text style={styles.dateButtonText}>
                 To: {customEndDate.toLocaleString('default', { month: 'short', year: 'numeric' })}
@@ -185,8 +341,11 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
           <TouchableOpacity
             style={styles.monthButton}
             onPress={() => {
-              setIsStartDate(true);
-              setShowDatePicker(true);
+              if (selectedTimeRange === 'monthly') {
+                setShowMonthPicker(true);
+              } else {
+                setShowYearPicker(true);
+              }
             }}
           >
             <Text style={styles.monthButtonText}>
@@ -196,16 +355,9 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
         )}
       </View>
 
-      {showDatePicker && (
-        <DateTimePicker
-          value={isStartDate ? customStartDate : customEndDate}
-          mode="date"
-          display="default"
-          onChange={handleDateChange}
-          maximumDate={new Date()}
-          minimumDate={selectedTimeRange === 'custom' && !isStartDate ? customStartDate : undefined}
-        />
-      )}
+      {renderMonthPicker()}
+      {renderYearPicker()}
+      {renderCustomPicker()}
 
       {spendingByCategory.length > 0 ? (
         <View style={styles.chartContainer}>
@@ -451,6 +603,50 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#201c5c',
     fontFamily: 'Montserrat-SemiBold',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  pickerContainer: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 20,
+  },
+  pickerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  pickerTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#201c5c',
+    fontFamily: 'Montserrat-SemiBold',
+  },
+  pickerCloseButton: {
+    fontSize: 16,
+    color: '#201c5c',
+    fontFamily: 'Montserrat-SemiBold',
+  },
+  customPickerContent: {
+    flexDirection: 'row',
+    padding: 16,
+  },
+  pickerSection: {
+    flex: 1,
+    marginHorizontal: 8,
+  },
+  pickerLabel: {
+    fontSize: 14,
+    color: '#201c5c',
+    fontFamily: 'Montserrat-SemiBold',
+    marginBottom: 8,
   },
 });
 
