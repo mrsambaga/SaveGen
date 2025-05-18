@@ -7,6 +7,7 @@ import CategoryIcons from '../../components/CategoryIcons';
 import { formatCurrency } from '../../utils/Formatter';
 import { Picker } from '@react-native-picker/picker';
 import { MONTHS } from '../../constants/const';
+import MonthPicker from './MonthPicker';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -14,7 +15,7 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
   const TODAY = new Date();
   const LAST_MONTH = new Date(TODAY.getFullYear(), TODAY.getMonth() - 1, 1);
   const CURRENT_YEAR = new Date().getFullYear();
-  const years = Array.from({ length: 6 }, (_, i) => CURRENT_YEAR - i);
+  const YEARS = Array.from({ length: 6 }, (_, i) => CURRENT_YEAR - i);
 
   const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeType>('monthly');
   const [selectedMonth, setSelectedMonth] = useState<Date>(TODAY);
@@ -123,12 +124,6 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
     }
   };
 
-  const handleMonthChange = (month: string) => {
-    const newDate = new Date(selectedMonth);
-    newDate.setMonth(MONTHS.indexOf(month));
-    setSelectedMonth(newDate);
-  };
-
   const handleYearChange = (year: number) => {
     const newDate = new Date(selectedMonth);
     newDate.setFullYear(year);
@@ -157,50 +152,6 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
     }
   };
 
-  const renderMonthPicker = () => (
-    <Modal
-      visible={showMonthPicker}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={() => setShowMonthPicker(false)}
-    >
-      <View style={styles.modalContainer}>
-        <View style={styles.pickerContainer}>
-          <View style={styles.pickerHeader}>
-            <Text style={styles.pickerTitle}>Select Month</Text>
-            <TouchableOpacity onPress={() => setShowMonthPicker(false)}>
-              <Text style={styles.pickerCloseButton}>Done</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.customPickerContent}>
-            <View style={styles.pickerSection}>
-              <Text style={styles.pickerLabel}>Month</Text>
-              <Picker
-                selectedValue={MONTHS[selectedMonth.getMonth()]}
-                onValueChange={handleMonthChange}
-              >
-                {MONTHS.map((month) => (
-                  <Picker.Item key={month} label={month} value={month} />
-                ))}
-              </Picker>
-            </View>
-            <View style={styles.pickerSection}>
-              <Text style={styles.pickerLabel}>Year</Text>
-              <Picker
-                selectedValue={selectedMonth.getFullYear()}
-                onValueChange={handleYearChange}
-              >
-                {years.map((year) => (
-                  <Picker.Item key={year} label={year.toString()} value={year} />
-                ))}
-              </Picker>
-            </View>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-
   const renderYearPicker = () => (
     <Modal
       visible={showYearPicker}
@@ -220,7 +171,7 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
             selectedValue={selectedMonth.getFullYear()}
             onValueChange={handleYearChange}
           >
-            {years.map((year) => (
+            {YEARS.map((year) => (
               <Picker.Item key={year} label={year.toString()} value={year} />
             ))}
           </Picker>
@@ -264,7 +215,7 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
                 selectedValue={isStartDate ? customStartDate.getFullYear() : customEndDate.getFullYear()}
                 onValueChange={handleCustomYearChange}
               >
-                {years.map((year) => (
+                {YEARS.map((year) => (
                   <Picker.Item key={year} label={year.toString()} value={year} />
                 ))}
               </Picker>
@@ -353,9 +304,14 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
         )}
       </View>
 
-      {renderMonthPicker()}
-      {renderYearPicker()}
       {renderCustomPicker()}
+      {renderYearPicker()}
+      <MonthPicker
+        selectedMonth={selectedMonth}
+        setSelectedMonth={setSelectedMonth}
+        showMonthPicker={showMonthPicker}
+        setShowMonthPicker={setShowMonthPicker}
+      />
 
       {spendingByCategory.length > 0 ? (
         <View style={styles.chartContainer}>

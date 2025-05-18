@@ -41,3 +41,10 @@ export type CategoryIconsProps = {
 export type TopSpendingProps = {
   item: TopSpendingItem
 }
+
+export type MonthPickerProps = {
+  selectedMonth: Date;
+  setSelectedMonth: (month: Date) => void;
+  showMonthPicker: boolean;
+  setShowMonthPicker: (show: boolean) => void;
+};
