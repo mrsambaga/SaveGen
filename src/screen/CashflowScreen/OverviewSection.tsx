@@ -12,17 +12,20 @@ const screenWidth = Dimensions.get('window').width;
 type TimeRangeType = 'monthly' | 'yearly' | 'custom';
 
 const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
+  const TODAY = new Date();
+  const LAST_MONTH = new Date(TODAY.getFullYear(), TODAY.getMonth() - 1, 1);
+  const CURRENT_YEAR = new Date().getFullYear();
+
   const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeType>('monthly');
-  const [selectedMonth, setSelectedMonth] = useState<Date>(new Date());
+  const [selectedMonth, setSelectedMonth] = useState<Date>(TODAY);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
   const [showYearPicker, setShowYearPicker] = useState(false);
   const [showCustomPicker, setShowCustomPicker] = useState(false);
   const [isStartDate, setIsStartDate] = useState(true);
-  const [customStartDate, setCustomStartDate] = useState<Date>(new Date());
-  const [customEndDate, setCustomEndDate] = useState<Date>(new Date());
+  const [customStartDate, setCustomStartDate] = useState<Date>(LAST_MONTH);
+  const [customEndDate, setCustomEndDate] = useState<Date>(TODAY);
 
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 6 }, (_, i) => currentYear - i);
+  const years = Array.from({ length: 6 }, (_, i) => CURRENT_YEAR - i);
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
