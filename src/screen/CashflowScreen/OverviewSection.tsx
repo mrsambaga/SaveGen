@@ -46,7 +46,7 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
       endDate.setFullYear(endDate.getFullYear() + 1);
       return transactions.filter(transaction => {
         const transactionDate = new Date(transaction.date);
-        return transactionDate >= customStartDate && transactionDate < endDate;
+        return transactionDate.getFullYear() >= customStartDate.getFullYear() && transactionDate.getFullYear() < endDate.getFullYear();
       });
     } else if (selectedTimeRange === 'custom') {
       return transactions.filter(transaction => {
