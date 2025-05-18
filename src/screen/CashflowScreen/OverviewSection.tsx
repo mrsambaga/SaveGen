@@ -1,20 +1,20 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { PieChart } from 'react-native-chart-kit';
-import { ChartDataItem } from '../../constants/types';
+import { ChartDataItem, TimeRangeType } from '../../constants/types';
 import { OverviewProps } from '../../constants/props';
 import CategoryIcons from '../../components/CategoryIcons';
 import { formatCurrency } from '../../utils/Formatter';
 import { Picker } from '@react-native-picker/picker';
+import { MONTHS } from '../../constants/const';
 
 const screenWidth = Dimensions.get('window').width;
-
-type TimeRangeType = 'monthly' | 'yearly' | 'custom';
 
 const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
   const TODAY = new Date();
   const LAST_MONTH = new Date(TODAY.getFullYear(), TODAY.getMonth() - 1, 1);
   const CURRENT_YEAR = new Date().getFullYear();
+  const years = Array.from({ length: 6 }, (_, i) => CURRENT_YEAR - i);
 
   const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRangeType>('monthly');
   const [selectedMonth, setSelectedMonth] = useState<Date>(TODAY);
@@ -25,11 +25,6 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
   const [customStartDate, setCustomStartDate] = useState<Date>(LAST_MONTH);
   const [customEndDate, setCustomEndDate] = useState<Date>(TODAY);
 
-  const years = Array.from({ length: 6 }, (_, i) => CURRENT_YEAR - i);
-  const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
 
   const transactions = useMemo(() => {
     return route.params?.transactions || [];
@@ -130,7 +125,7 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
 
   const handleMonthChange = (month: string) => {
     const newDate = new Date(selectedMonth);
-    newDate.setMonth(months.indexOf(month));
+    newDate.setMonth(MONTHS.indexOf(month));
     setSelectedMonth(newDate);
   };
 
@@ -143,7 +138,7 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
   const handleCustomMonthChange = (month: string) => {
     const targetDate = isStartDate ? customStartDate : customEndDate;
     const newDate = new Date(targetDate);
-    newDate.setMonth(months.indexOf(month));
+    newDate.setMonth(MONTHS.indexOf(month));
     if (isStartDate) {
       setCustomStartDate(newDate);
     } else {
@@ -181,10 +176,10 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
             <View style={styles.pickerSection}>
               <Text style={styles.pickerLabel}>Month</Text>
               <Picker
-                selectedValue={months[selectedMonth.getMonth()]}
+                selectedValue={MONTHS[selectedMonth.getMonth()]}
                 onValueChange={handleMonthChange}
               >
-                {months.map((month) => (
+                {MONTHS.map((month) => (
                   <Picker.Item key={month} label={month} value={month} />
                 ))}
               </Picker>
@@ -255,10 +250,10 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
             <View style={styles.pickerSection}>
               <Text style={styles.pickerLabel}>Month</Text>
               <Picker
-                selectedValue={months[isStartDate ? customStartDate.getMonth() : customEndDate.getMonth()]}
+                selectedValue={MONTHS[isStartDate ? customStartDate.getMonth() : customEndDate.getMonth()]}
                 onValueChange={handleCustomMonthChange}
               >
-                {months.map((month) => (
+                {MONTHS.map((month) => (
                   <Picker.Item key={month} label={month} value={month} />
                 ))}
               </Picker>

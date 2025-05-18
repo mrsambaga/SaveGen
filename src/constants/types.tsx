@@ -33,3 +33,5 @@ export type IconCategoryName =
   | 'family'
   | 'entertainment'
   | 'health';
+
+export type TimeRangeType = 'monthly' | 'yearly' | 'custom';
