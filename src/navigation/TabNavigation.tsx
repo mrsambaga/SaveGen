@@ -1,17 +1,19 @@
 import React from 'react';
-import {Text} from 'react-native';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {IconProp} from '@fortawesome/fontawesome-svg-core';
+import { Text } from 'react-native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import {
   faHouse,
   faMoneyBillTransfer,
   faUser,
+  faCirclePlus,
 } from '@fortawesome/free-solid-svg-icons';
 
 import HomeScreen from '../screen/HomeScreen/HomeScreen';
 import ProfileScreen from '../screen/ProfileScreen/ProfileScreen';
 import CashFlowNavigation from './CashFlowNavigation';
+import TransactionScreen from '../screen/TransactionScreen/TransactionScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -24,28 +26,35 @@ const renderTabIcon = (focused: boolean, name: IconProp) => {
 };
 
 const renderTabLabel = (focused: boolean, label: string) => {
-  return <Text style={{color: getColor(focused)}}>{label}</Text>;
+  return <Text style={{ color: getColor(focused) }}>{label}</Text>;
 };
 
 const tabScreenOptions = {
   homeScreen: {
-    tabBarLabel: ({focused}: {focused: boolean}) =>
+    tabBarLabel: ({ focused }: { focused: boolean }) =>
       renderTabLabel(focused, 'Home'),
-    tabBarIcon: ({focused}: {focused: boolean}) =>
+    tabBarIcon: ({ focused }: { focused: boolean }) =>
       renderTabIcon(focused, faHouse),
     tabBarAccessibilityLabel: 'Home Tab Button',
   },
+  transactionScreen: {
+    tabBarLabel: ({ focused }: { focused: boolean }) =>
+      renderTabLabel(focused, 'Transaction'),
+    tabBarIcon: ({ focused }: { focused: boolean }) =>
+      renderTabIcon(focused, faCirclePlus),
+    tabBarAccessibilityLabel: 'Transaction Tab Button',
+  },
   cashFlowScreen: {
-    tabBarLabel: ({focused}: {focused: boolean}) =>
+    tabBarLabel: ({ focused }: { focused: boolean }) =>
       renderTabLabel(focused, 'Cash Flow'),
-    tabBarIcon: ({focused}: {focused: boolean}) =>
+    tabBarIcon: ({ focused }: { focused: boolean }) =>
       renderTabIcon(focused, faMoneyBillTransfer),
     tabBarAccessibilityLabel: 'Cash Flow Tab Button',
   },
   profileScreen: {
-    tabBarLabel: ({focused}: {focused: boolean}) =>
+    tabBarLabel: ({ focused }: { focused: boolean }) =>
       renderTabLabel(focused, 'Profile'),
-    tabBarIcon: ({focused}: {focused: boolean}) =>
+    tabBarIcon: ({ focused }: { focused: boolean }) =>
       renderTabIcon(focused, faUser),
     tabBarAccessibilityLabel: 'Profile Tab Button',
   },
@@ -66,6 +75,11 @@ const TabNavigation = () => {
         name="CashFlow"
         component={CashFlowNavigation}
         options={tabScreenOptions.cashFlowScreen}
+      />
+      <Tab.Screen
+        name="Transaction"
+        component={TransactionScreen}
+        options={tabScreenOptions.transactionScreen}
       />
       <Tab.Screen
         name="Profile"
