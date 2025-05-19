@@ -13,7 +13,7 @@ import {
 import HomeScreen from '../screen/HomeScreen/HomeScreen';
 import ProfileScreen from '../screen/ProfileScreen/ProfileScreen';
 import CashFlowNavigation from './CashFlowNavigation';
-import TransactionScreen from '../screen/TransactionScreen/TransactionScreen';
+import NewTransactionScreen from '../screen/NewTransactionScreen/NewTransactionScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -78,7 +78,7 @@ const TabNavigation = () => {
       />
       <Tab.Screen
         name="Transaction"
-        component={TransactionScreen}
+        component={NewTransactionScreen}
         options={tabScreenOptions.transactionScreen}
       />
       <Tab.Screen
