@@ -94,7 +94,7 @@ const CashflowScreen: React.FC<CashflowProps> = ({ navigation }) => {
           sections={groupedTransactions}
           renderItem={renderTransactionItem}
           renderSectionHeader={renderSectionHeader}
-          keyExtractor={item => item.id}
+          keyExtractor={item => item.id!}
           showsVerticalScrollIndicator={false}
           style={styles.transactionList}
         />
