@@ -1,4 +1,4 @@
-import {Transaction} from './types';
+import { Transaction } from './types';
 
 export type RootStackParamList = {
   Landing: undefined;
@@ -6,6 +6,8 @@ export type RootStackParamList = {
   MainTabs: undefined;
   Home: undefined;
   Login: undefined;
+  NewTransaction: undefined;
+  CashFlow: undefined;
 };
 
 export type CashFlowStackParamList = {

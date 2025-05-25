@@ -4,10 +4,10 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { categoryIconLabelMap } from "../../constants/const";
 import CategoryModal from "./CategoryModal";
 import { createTransaction } from "../../service/transactionService";
-import { Transaction } from "../../constants/types";
 import { CreateTransactionRequestDTO } from "../../constants/dto";
+import { NewTransactionProps } from "../../constants/props";
 
-const NewTransactionScreen: React.FC = () => {
+const NewTransactionScreen: React.FC<NewTransactionProps> = ({ navigation }) => {
     const [amount, setAmount] = useState('');
     const [date, setDate] = useState(new Date());
     const [description, setDescription] = useState('');
@@ -24,8 +24,8 @@ const NewTransactionScreen: React.FC = () => {
             transaction_type: parseFloat(amount) > 0 ? 'credit' : 'debit',
             transaction_category: category
         }
-
         createTransaction(requestDTO);
+        navigation.navigate('CashFlow')
     };
 
     const onDateChange = (event: any, selectedDate?: Date) => {

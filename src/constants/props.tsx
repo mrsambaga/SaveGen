@@ -48,3 +48,7 @@ export type MonthPickerProps = {
   showMonthPicker: boolean;
   setShowMonthPicker: (show: boolean) => void;
 };
+
+export type NewTransactionProps = {
+  navigation: StackNavigationProp<RootStackParamList, 'NewTransaction'>;
+};
