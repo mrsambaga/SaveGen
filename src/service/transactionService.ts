@@ -1,11 +1,11 @@
 import axios, { AxiosError } from 'axios';
 import { Transaction } from '../constants/types';
-import { CreateTransactionResponseDto, GetTransactionDto } from '../constants/dto';
+import { CreateTransactionRequestDTO, CreateTransactionResponseDTO, GetTransactionDTO } from '../constants/dto';
 import { path } from '../constants/path';
 
 export const fetchTransactions = async (userId: number = 1): Promise<Transaction[]> => {
   try {
-    const response = await axios.get<GetTransactionDto>(path.GET_TRANSACTIONS, {
+    const response = await axios.get<GetTransactionDTO>(path.GET_TRANSACTIONS, {
       params: {
         user_id: userId
       }
@@ -20,9 +20,9 @@ export const fetchTransactions = async (userId: number = 1): Promise<Transaction
   }
 };
 
-export const createTransaction = async (transaction: Transaction): Promise<Transaction> => {
+export const createTransaction = async (requestDTO: CreateTransactionRequestDTO): Promise<Transaction> => {
   try {
-    const response = await axios.post<CreateTransactionResponseDto>(path.CREATE_TRANSACTION, transaction);
+    const response = await axios.post<CreateTransactionResponseDTO>(path.CREATE_TRANSACTION, requestDTO);
 
     return response.data.data;
   } catch (error) {

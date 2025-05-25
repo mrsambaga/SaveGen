@@ -5,6 +5,7 @@ import { categoryIconLabelMap } from "../../constants/const";
 import CategoryModal from "./CategoryModal";
 import { createTransaction } from "../../service/transactionService";
 import { Transaction } from "../../constants/types";
+import { CreateTransactionRequestDTO } from "../../constants/dto";
 
 const NewTransactionScreen: React.FC = () => {
     const [amount, setAmount] = useState('');
@@ -15,17 +16,16 @@ const NewTransactionScreen: React.FC = () => {
     const [showCategoryModal, setShowCategoryModal] = useState(false);
 
     const handleSave = () => {
-        const transaction: Transaction = {
-            amount: parseFloat(amount),
+        const requestDTO: CreateTransactionRequestDTO = {
+            user_id: 1,
+            amount: Math.abs(parseFloat(amount)),
             date: date.toISOString(),
             detail: description,
-            transaction_type: parseFloat(amount) > 0 ? 'debit' : 'credit',
+            transaction_type: parseFloat(amount) > 0 ? 'credit' : 'debit',
             transaction_category: category
         }
 
-        console.log(transaction);
-
-        createTransaction(transaction);
+        createTransaction(requestDTO);
     };
 
     const onDateChange = (event: any, selectedDate?: Date) => {
