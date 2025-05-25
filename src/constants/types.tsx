@@ -1,5 +1,5 @@
 export type Transaction = {
-  id: string;
+  id?: string;
   date: string;
   detail: string;
   amount: number;
