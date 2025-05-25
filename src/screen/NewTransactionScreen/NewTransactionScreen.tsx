@@ -1,4 +1,4 @@
-import { Text, View, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { Text, View, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
 import { useState } from "react";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { categoryIconLabelMap } from "../../constants/const";
@@ -14,18 +14,38 @@ const NewTransactionScreen: React.FC<NewTransactionProps> = ({ navigation }) => 
     const [category, setCategory] = useState('other');
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showCategoryModal, setShowCategoryModal] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleSave = () => {
-        const requestDTO: CreateTransactionRequestDTO = {
-            user_id: 1,
-            amount: Math.abs(parseFloat(amount)),
-            date: date.toISOString(),
-            detail: description,
-            transaction_type: parseFloat(amount) > 0 ? 'credit' : 'debit',
-            transaction_category: category
+    const handleSave = async () => {
+        if (!amount || parseFloat(amount) === 0) {
+            Alert.alert('Error', 'Please enter a valid amount');
+            return;
         }
-        createTransaction(requestDTO);
-        navigation.navigate('CashFlow')
+
+        try {
+            setIsLoading(true);
+            const requestDTO: CreateTransactionRequestDTO = {
+                user_id: 1,
+                amount: Math.abs(parseFloat(amount)),
+                date: date.toISOString(),
+                detail: description,
+                transaction_type: parseFloat(amount) > 0 ? 'credit' : 'debit',
+                transaction_category: category
+            };
+
+            await createTransaction(requestDTO);
+
+            setAmount('');
+            setDescription('');
+            setCategory('other');
+            setDate(new Date());
+
+            navigation.navigate('CashFlow', { shouldRefresh: true });
+        } catch (error) {
+            Alert.alert('Error', 'Failed to save transaction. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const onDateChange = (event: any, selectedDate?: Date) => {
@@ -92,10 +112,11 @@ const NewTransactionScreen: React.FC<NewTransactionProps> = ({ navigation }) => 
                 </View>
 
                 <TouchableOpacity
-                    style={styles.saveButton}
+                    style={[styles.saveButton, isLoading && styles.saveButtonDisabled]}
                     onPress={handleSave}
+                    disabled={isLoading}
                 >
-                    <Text style={styles.saveButtonText}>Save</Text>
+                    <Text style={styles.saveButtonText}>{isLoading ? 'Saving...' : 'Save'}</Text>
                 </TouchableOpacity>
             </View>
         </ScrollView>
@@ -149,6 +170,10 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         alignItems: 'center',
         marginTop: 20,
+    },
+    saveButtonDisabled: {
+        backgroundColor: '#ccc',
+        opacity: 0.6,
     },
     saveButtonText: {
         color: '#fff',

@@ -8,21 +8,33 @@ import SpendingChart from './SpendingChart';
 import { fetchTransactions } from '../../service/transactionService';
 import { categoryIconLabelMap } from '../../constants/const';
 
-const CashflowScreen: React.FC<CashflowProps> = ({ navigation }) => {
+const CashflowScreen: React.FC<CashflowProps> = ({ navigation, route }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const getTransactions = async () => {
+    try {
+      setIsLoading(true);
+      const fetchedTransactions = await fetchTransactions(1);
+      setTransactions(fetchedTransactions);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      setTransactions([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const getTransactions = async () => {
-      try {
-        const fetchedTransactions = await fetchTransactions(1);
-        setTransactions(fetchedTransactions);
-      } catch (error) {
-        setTransactions([]);
-      }
-    };
-
     getTransactions();
   }, []);
+
+  useEffect(() => {
+    if (route.params?.shouldRefresh) {
+      getTransactions();
+      navigation.setParams({ shouldRefresh: false });
+    }
+  }, [route.params?.shouldRefresh]);
 
   const groupedTransactions = useMemo(() => {
     if (!Array.isArray(transactions) || transactions.length === 0) {

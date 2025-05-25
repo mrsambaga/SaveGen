@@ -7,11 +7,11 @@ export type RootStackParamList = {
   Home: undefined;
   Login: undefined;
   NewTransaction: undefined;
-  CashFlow: undefined;
+  CashFlow: { shouldRefresh?: boolean } | undefined;
 };
 
 export type CashFlowStackParamList = {
-  Transactions: undefined;
+  Transactions: { shouldRefresh?: boolean } | undefined;
   Overview: {
     transactions: Transaction[];
   };

@@ -5,6 +5,7 @@ import { TopSpendingItem, Transaction } from './types';
 
 export type CashflowProps = {
   navigation: StackNavigationProp<CashFlowStackParamList, 'Transactions'>;
+  route: RouteProp<RootStackParamList, 'CashFlow'>;
 };
 
 export type SpendingChartProps = {
