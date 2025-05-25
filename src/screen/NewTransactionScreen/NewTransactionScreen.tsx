@@ -1,3 +1,4 @@
+import React from "react";
 import { Text, View, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
 import { useState } from "react";
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -6,6 +7,7 @@ import CategoryModal from "./CategoryModal";
 import { createTransaction } from "../../service/transactionService";
 import { CreateTransactionRequestDTO } from "../../constants/dto";
 import { NewTransactionProps } from "../../constants/props";
+import LoadingModal from "../../components/LoadingModal";
 
 const NewTransactionScreen: React.FC<NewTransactionProps> = ({ navigation }) => {
     const [amount, setAmount] = useState('');
@@ -60,66 +62,73 @@ const NewTransactionScreen: React.FC<NewTransactionProps> = ({ navigation }) => 
     }
 
     return (
-        <ScrollView style={styles.container}>
-            <View style={styles.formContainer}>
-                <Text style={styles.title}>New Transaction</Text>
+        <>
+            <ScrollView style={styles.container}>
+                <View style={styles.formContainer}>
+                    <Text style={styles.title}>New Transaction</Text>
 
-                <View style={styles.inputContainer}>
-                    <Text style={styles.label}>Amount</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={amount}
-                        onChangeText={setAmount}
-                        placeholder="Enter amount"
-                        keyboardType="numeric"
-                    />
-                </View>
-
-                <View style={styles.inputContainer}>
-                    <Text style={styles.label}>Date</Text>
-                    <TouchableOpacity
-                        style={styles.dateButton}
-                        onPress={() => setShowDatePicker(true)}
-                    >
-                        <Text style={styles.dateText}>{renderDateText()}</Text>
-                    </TouchableOpacity>
-                    {showDatePicker && (
-                        <DateTimePicker
-                            value={date}
-                            mode="date"
-                            onChange={onDateChange}
+                    <View style={styles.inputContainer}>
+                        <Text style={styles.label}>Amount</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={amount}
+                            onChangeText={setAmount}
+                            placeholder="Enter amount"
+                            keyboardType="numeric"
                         />
-                    )}
-                </View>
+                    </View>
 
-                <View style={styles.inputContainer}>
-                    <Text style={styles.label}>Description</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={description}
-                        onChangeText={setDescription}
-                        placeholder="Enter description"
-                    />
-                </View>
+                    <View style={styles.inputContainer}>
+                        <Text style={styles.label}>Date</Text>
+                        <TouchableOpacity
+                            style={styles.dateButton}
+                            onPress={() => setShowDatePicker(true)}
+                        >
+                            <Text style={styles.dateText}>{renderDateText()}</Text>
+                        </TouchableOpacity>
+                        {showDatePicker && (
+                            <DateTimePicker
+                                value={date}
+                                mode="date"
+                                onChange={onDateChange}
+                            />
+                        )}
+                    </View>
 
-                <View style={styles.inputContainer}>
-                    <Text style={styles.label}>Category</Text>
-                    <TouchableOpacity onPress={() => setShowCategoryModal(true)}
-                        style={styles.categoryButton}>
-                        <Text style={styles.label}>{categoryIconLabelMap[category]}</Text>
+                    <View style={styles.inputContainer}>
+                        <Text style={styles.label}>Description</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={description}
+                            onChangeText={setDescription}
+                            placeholder="Enter description"
+                        />
+                    </View>
+
+                    <View style={styles.inputContainer}>
+                        <Text style={styles.label}>Category</Text>
+                        <TouchableOpacity onPress={() => setShowCategoryModal(true)}
+                            style={styles.categoryButton}>
+                            <Text style={styles.label}>{categoryIconLabelMap[category]}</Text>
+                        </TouchableOpacity>
+                        {showCategoryModal && <CategoryModal {...{ showCategoryModal, setShowCategoryModal, category, setCategory }} />}
+                    </View>
+
+                    <TouchableOpacity
+                        style={[styles.saveButton, isLoading && styles.saveButtonDisabled]}
+                        onPress={handleSave}
+                        disabled={isLoading}
+                    >
+                        <Text style={styles.saveButtonText}>Save</Text>
                     </TouchableOpacity>
-                    {showCategoryModal && <CategoryModal {...{ showCategoryModal, setShowCategoryModal, category, setCategory }} />}
                 </View>
+            </ScrollView>
 
-                <TouchableOpacity
-                    style={[styles.saveButton, isLoading && styles.saveButtonDisabled]}
-                    onPress={handleSave}
-                    disabled={isLoading}
-                >
-                    <Text style={styles.saveButtonText}>{isLoading ? 'Saving...' : 'Save'}</Text>
-                </TouchableOpacity>
-            </View>
-        </ScrollView>
+            <LoadingModal
+                visible={isLoading}
+                message="Saving transaction..."
+            />
+        </>
     );
 };
 
