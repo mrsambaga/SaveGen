@@ -9,8 +9,14 @@ import { useState } from 'react';
 import ProfileImage from './ProfileImage';
 import SettingsSection from './SettingsSection';
 import { useUser } from '../../context/UserContext';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../constants/navigation';
 
-const ProfileScreen: React.FC = () => {
+type ProfileScreenProps = {
+  navigation: StackNavigationProp<RootStackParamList>;
+};
+
+const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [userProfileImage] = useState<string | null>(null);
   const { user } = useUser();
   const userName = user?.username || 'User';
@@ -38,7 +44,7 @@ const ProfileScreen: React.FC = () => {
             <Text style={styles.userName}>{userName}</Text>
             <Text style={styles.email}>{email}</Text>
 
-            <SettingsSection />
+            <SettingsSection navigation={navigation} />
           </View>
         </View>
       </ImageBackground>

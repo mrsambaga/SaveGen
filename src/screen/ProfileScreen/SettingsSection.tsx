@@ -1,4 +1,4 @@
-import {StyleSheet, Text, View} from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import SettingsOption from './SettingsOption';
 import {
   faUniversity,
@@ -9,14 +9,20 @@ import {
   faComment,
   faFileText,
 } from '@fortawesome/free-solid-svg-icons';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../constants/navigation';
 
-const SettingsSection: React.FC = () => {
+type SettingsSectionProps = {
+  navigation: StackNavigationProp<RootStackParamList>;
+};
+
+const SettingsSection: React.FC<SettingsSectionProps> = ({ navigation }) => {
   const generalOptions = [
     {
       iconName: faUser,
       iconType: 'solid',
       title: 'Account',
-      onPress: () => console.log('Account pressed'),
+      onPress: () => navigation.navigate('Account'),
     },
     {
       iconName: faGlobe,
