@@ -5,14 +5,16 @@ import {
   Text,
   View,
 } from 'react-native';
-import {useState} from 'react';
+import { useState } from 'react';
 import ProfileImage from './ProfileImage';
 import SettingsSection from './SettingsSection';
+import { useUser } from '../../context/UserContext';
 
 const ProfileScreen: React.FC = () => {
   const [userProfileImage] = useState<string | null>(null);
-  const userName = 'Sam Wilson';
-  const email = 'sam.wilson@gmail.com';
+  const { user } = useUser();
+  const userName = user?.username || 'User';
+  const email = user?.email || 'No email';
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>

@@ -2,10 +2,11 @@ import { Image, StyleSheet, View, TouchableOpacity, ScrollView } from 'react-nat
 import { Text } from 'react-native-gesture-handler';
 import Button from '../../components/Button';
 import { HomeProps, TopSpendingProps } from '../../constants/props';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { formatCurrency } from '../../utils/Formatter';
 import { Transaction } from '../../constants/types';
 import { useTransactions } from '../../context/TransactionContext';
+import { useUser } from '../../context/UserContext';
 import {
   faEye,
   faEyeSlash,
@@ -16,7 +17,12 @@ import { categoryIconLabelMap } from '../../constants/const';
 
 const HomeScreen: React.FC<HomeProps> = ({ navigation }) => {
   const { transactions } = useTransactions();
+  const { user, refreshUser } = useUser();
   const [showBalance, setShowBalance] = useState(false);
+
+  useEffect(() => {
+    refreshUser();
+  }, []);
 
   const thisMonthSpending = useMemo(() => {
     const currentDate = new Date();
@@ -98,7 +104,7 @@ const HomeScreen: React.FC<HomeProps> = ({ navigation }) => {
       style={styles.container}
       showsVerticalScrollIndicator={false}
     >
-      <Text style={styles.title}>Welcome back, Sam!</Text>
+      <Text style={styles.title}>Welcome back, {user?.username || 'User'}!</Text>
       <View style={styles.card}>
         <View style={styles.topCard}>
           <Text style={styles.cardText}>This Month Spending</Text>
