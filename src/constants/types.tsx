@@ -1,3 +1,8 @@
+export type User = {
+  username: string;
+  email: string;
+};
+
 export type Transaction = {
   id?: string;
   date: string;
@@ -16,9 +21,9 @@ export type ChartDataItem = {
 };
 
 export type TopSpendingItem = {
-  categoryName: string,
-  totalAmount: number,
-}
+  categoryName: string;
+  totalAmount: number;
+};
 
 export type IconCategoryName =
   | 'salary'
