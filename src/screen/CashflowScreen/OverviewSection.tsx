@@ -15,6 +15,21 @@ const RADIUS = (CHART_SIZE - STROKE_WIDTH) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 const CENTER = CHART_SIZE / 2;
 
+const CATEGORY_LABEL_OVERRIDES: Record<string, string> = {
+  foodanddrink: 'Food & Drink',
+};
+
+const formatCategoryName = (name: string): string => {
+  const key = name.toLowerCase();
+  if (CATEGORY_LABEL_OVERRIDES[key]) {
+    return CATEGORY_LABEL_OVERRIDES[key];
+  }
+  return name
+    .split(' ')
+    .map(word => (word ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : ''))
+    .join(' ');
+};
+
 const PALETTE = [
   '#2D2A6E',
   '#7C5DFC',
@@ -379,7 +394,7 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
               <View key={index} style={styles.legendItem}>
                 <View style={[styles.legendDot, { backgroundColor: item.color }]} />
                 <Text style={styles.legendText}>
-                  {item.name} ({((item.amount / totalSpending) * 100).toFixed(1)}%)
+                  {formatCategoryName(item.name)} ({((item.amount / totalSpending) * 100).toFixed(1)}%)
                 </Text>
               </View>
             ))}
@@ -400,7 +415,7 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
               size={20}
               color={item.color}
             />
-            <Text style={styles.categoryName}>{item.name}</Text>
+            <Text style={styles.categoryName}>{formatCategoryName(item.name)}</Text>
             <Text style={styles.categoryAmount}>{formatCurrency(item.amount)}</Text>
           </View>
         ))}
