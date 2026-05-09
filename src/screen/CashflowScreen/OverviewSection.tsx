@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, ScrollView, TouchableOpacity, Modal } from 'react-native';
-import { PieChart } from 'react-native-chart-kit';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
+import Svg, { G, Circle } from 'react-native-svg';
 import { ChartDataItem, TimeRangeType } from '../../constants/types';
 import { OverviewProps } from '../../constants/props';
 import CategoryIcons from '../../components/CategoryIcons';
@@ -9,7 +9,27 @@ import { Picker } from '@react-native-picker/picker';
 import { MONTHS } from '../../constants/const';
 import MonthPicker from './MonthPicker';
 
-const screenWidth = Dimensions.get('window').width;
+const CHART_SIZE = 200;
+const STROKE_WIDTH = 32;
+const RADIUS = (CHART_SIZE - STROKE_WIDTH) / 2;
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+const CENTER = CHART_SIZE / 2;
+
+const PALETTE = [
+  '#2D2A6E',
+  '#7C5DFC',
+  '#4FB0AE',
+  '#E5DEFF',
+  '#A78BFA',
+  '#5EEAD4',
+  '#F59E0B',
+  '#F472B6',
+  '#34D399',
+  '#60A5FA',
+  '#EC4899',
+  '#FB923C',
+  '#14B8A6',
+];
 
 const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
   const TODAY = new Date();
@@ -78,41 +98,39 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
       {},
     );
 
-    return Object.entries(categoryTotals).map(([name, amount], index) => {
-      const colors = [
-        '#FF6384',
-        '#36A2EB',
-        '#FFCE56',
-        '#4BC0C0',
-        '#9966FF',
-        '#FF9F40',
-        '#8AC926',
-      ];
-
-      return {
+    return Object.entries(categoryTotals)
+      .sort(([, a], [, b]) => b - a)
+      .map(([name, amount], index) => ({
         name,
         amount,
-        color: colors[index % colors.length],
+        color: PALETTE[index % PALETTE.length],
         legendFontColor: '#201c5c',
         legendFontSize: 12,
-      };
-    });
+      }));
   }, [filteredTransactions]);
 
   const totalSpending = useMemo<number>(() => {
     return spendingByCategory.reduce((sum, item) => sum + item.amount, 0);
   }, [spendingByCategory]);
 
-  const chartConfig = {
-    backgroundGradientFrom: '#fff',
-    backgroundGradientTo: '#fff',
-    color: (opacity = 1) => `rgba(32, 28, 92, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(32, 28, 92, ${opacity})`,
-    propsForLabels: {
-      fontSize: 12,
-      fontFamily: 'Montserrat-SemiBold',
-    },
-  };
+  const formattedTotal = useMemo<string>(() => {
+    if (totalSpending >= 1_000_000_000) {
+      return `Rp ${(totalSpending / 1_000_000_000).toFixed(1)}B`;
+    }
+    if (totalSpending >= 1_000_000) {
+      return `Rp ${(totalSpending / 1_000_000).toFixed(1)}M`;
+    }
+    if (totalSpending >= 1_000) {
+      return `Rp ${(totalSpending / 1_000).toFixed(1)}K`;
+    }
+    return `Rp ${totalSpending}`;
+  }, [totalSpending]);
+
+  const overviewTitle = useMemo<string>(() => {
+    if (selectedTimeRange === 'monthly') return 'Monthly Overview';
+    if (selectedTimeRange === 'yearly') return 'Yearly Overview';
+    return 'Custom Overview';
+  }, [selectedTimeRange]);
 
   const getTimeRangeText = () => {
     if (selectedTimeRange === 'monthly') {
@@ -226,19 +244,58 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
     </Modal>
   );
 
+  const renderDonutChart = () => {
+    let cumulativePercent = 0;
+
+    return (
+      <View style={styles.donutWrapper}>
+        <Svg width={CHART_SIZE} height={CHART_SIZE}>
+          <G rotation={-90} origin={`${CENTER}, ${CENTER}`}>
+            <Circle
+              cx={CENTER}
+              cy={CENTER}
+              r={RADIUS}
+              fill="transparent"
+              stroke="#F1EEFF"
+              strokeWidth={STROKE_WIDTH}
+            />
+            {spendingByCategory.map((item, index) => {
+              const percent = totalSpending > 0 ? item.amount / totalSpending : 0;
+              const dashLength = percent * CIRCUMFERENCE;
+              const offset = -cumulativePercent * CIRCUMFERENCE;
+              cumulativePercent += percent;
+
+              return (
+                <Circle
+                  key={index}
+                  cx={CENTER}
+                  cy={CENTER}
+                  r={RADIUS}
+                  fill="transparent"
+                  stroke={item.color}
+                  strokeWidth={STROKE_WIDTH}
+                  strokeDasharray={`${dashLength} ${CIRCUMFERENCE - dashLength}`}
+                  strokeDashoffset={offset}
+                  strokeLinecap="butt"
+                />
+              );
+            })}
+          </G>
+        </Svg>
+        <View style={styles.donutCenter} pointerEvents="none">
+          <Text style={styles.donutCenterLabel}>Total Spent</Text>
+          <Text style={styles.donutCenterValue}>{formattedTotal}</Text>
+        </View>
+      </View>
+    );
+  };
+
   return (
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.header}>
-        <Text style={styles.title}>Spending Overview</Text>
-        <Text style={styles.subtitle}>
-          Total Spending: {formatCurrency(totalSpending)}
-        </Text>
-      </View>
-
       <View style={styles.timeRangeContainer}>
         <View style={styles.timeRangeButtons}>
           <TouchableOpacity
@@ -315,28 +372,12 @@ const OverviewScreen: React.FC<OverviewProps> = ({ route }) => {
 
       {spendingByCategory.length > 0 ? (
         <View style={styles.chartContainer}>
-          <PieChart
-            data={spendingByCategory}
-            width={screenWidth - 40}
-            height={220}
-            chartConfig={chartConfig}
-            accessor="amount"
-            backgroundColor="transparent"
-            paddingLeft="0"
-            absolute
-            hasLegend={false}
-            style={styles.chart}
-            center={[screenWidth / 4.5, 0]}
-            avoidFalseZero={true}
-          />
+          <Text style={styles.chartTitle}>{overviewTitle}</Text>
+          {renderDonutChart()}
           <View style={styles.legendContainer}>
             {spendingByCategory.map((item, index) => (
               <View key={index} style={styles.legendItem}>
-                <CategoryIcons
-                  iconName={item.name.toLowerCase()}
-                  size={16}
-                  color={item.color}
-                />
+                <View style={[styles.legendDot, { backgroundColor: item.color }]} />
                 <Text style={styles.legendText}>
                   {item.name} ({((item.amount / totalSpending) * 100).toFixed(1)}%)
                 </Text>
@@ -394,44 +435,75 @@ const styles = StyleSheet.create({
   },
   chartContainer: {
     backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
+    borderRadius: 20,
+    padding: 20,
     marginBottom: 20,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 3,
   },
-  chart: {
+  chartTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2D2A6E',
+    fontFamily: 'Montserrat-SemiBold',
+    alignSelf: 'flex-start',
+    marginBottom: 16,
+  },
+  donutWrapper: {
+    width: CHART_SIZE,
+    height: CHART_SIZE,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginVertical: 8,
-    borderRadius: 16,
+  },
+  donutCenter: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  donutCenterLabel: {
+    fontSize: 12,
+    color: '#8B8AA3',
+    fontFamily: 'Montserrat-SemiBold',
+    marginBottom: 4,
+  },
+  donutCenterValue: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#2D2A6E',
+    fontFamily: 'Montserrat-SemiBold',
   },
   legendContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    paddingHorizontal: 10,
+    paddingHorizontal: 4,
+    marginTop: 16,
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    margin: 8,
-    backgroundColor: '#fff',
-    padding: 8,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    marginRight: 14,
+    marginVertical: 4,
+  },
+  legendDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 6,
   },
   legendText: {
     fontSize: 12,
-    color: '#201c5c',
+    color: '#2D2A6E',
     fontFamily: 'Montserrat-SemiBold',
-    marginLeft: 8,
   },
   noDataContainer: {
     height: 220,
