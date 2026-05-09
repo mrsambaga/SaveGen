@@ -46,10 +46,31 @@ const NewTransactionScreen: React.FC<NewTransactionProps> = ({navigation}) => {
   const accentColor =
     transactionKind === 'income' ? COLORS.income : COLORS.spending;
 
+  const handleAmountChange = (raw: string) => {
+    const digitsOnly = raw.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+    setAmount(digitsOnly);
+  };
+
+  const resetForm = () => {
+    setAmount('');
+    setDescription('');
+    setCategory('other');
+    setDate(new Date());
+    setTransactionKind('spending');
+  };
+
   const handleSave = async () => {
-    const parsed = parseFloat(amount);
-    if (!amount || isNaN(parsed) || parsed === 0) {
-      Alert.alert('Error', 'Please enter a valid amount');
+    if (!/^\d+$/.test(amount)) {
+      Alert.alert(
+        'Invalid amount',
+        'Amount must be a whole number greater than 0. Decimals and negative numbers are not allowed.',
+      );
+      return;
+    }
+
+    const parsed = parseInt(amount, 10);
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      Alert.alert('Invalid amount', 'Please enter an amount greater than 0.');
       return;
     }
 
@@ -57,7 +78,7 @@ const NewTransactionScreen: React.FC<NewTransactionProps> = ({navigation}) => {
       setIsLoading(true);
       const requestDTO: CreateTransactionRequestDTO = {
         user_id: 1,
-        amount: Math.abs(parsed),
+        amount: parsed,
         date: date.toISOString(),
         detail: description,
         transaction_type: transactionKind === 'income' ? 'credit' : 'debit',
@@ -66,15 +87,29 @@ const NewTransactionScreen: React.FC<NewTransactionProps> = ({navigation}) => {
 
       await createTransaction(requestDTO);
 
-      setAmount('');
-      setDescription('');
-      setCategory('other');
-      setDate(new Date());
-      setTransactionKind('spending');
+      const savedKind = transactionKind;
+      resetForm();
 
-      navigation.navigate('CashFlow', {shouldRefresh: true});
+      Alert.alert(
+        'Transaction saved',
+        `Your ${savedKind === 'income' ? 'income' : 'spending'} of Rp ${parsed.toLocaleString('id-ID')} was added successfully.`,
+        [
+          {
+            text: 'View Transactions',
+            onPress: () =>
+              navigation.navigate('CashFlow', {
+                screen: 'Transactions',
+                params: {shouldRefresh: true},
+              } as any),
+          },
+          {text: 'Add Another', style: 'cancel'},
+        ],
+      );
     } catch (error) {
-      Alert.alert('Error', 'Failed to save transaction. Please try again.');
+      Alert.alert(
+        'Save failed',
+        'We could not save your transaction. Please check your connection and try again.',
+      );
     } finally {
       setIsLoading(false);
     }
@@ -159,10 +194,11 @@ const NewTransactionScreen: React.FC<NewTransactionProps> = ({navigation}) => {
             <TextInput
               style={[styles.amountInput, {color: accentColor}]}
               value={amount}
-              onChangeText={setAmount}
+              onChangeText={handleAmountChange}
               placeholder="0"
               placeholderTextColor={COLORS.textMuted}
-              keyboardType="numeric"
+              keyboardType="number-pad"
+              maxLength={12}
             />
           </View>
         </View>
