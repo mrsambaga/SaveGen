@@ -1,5 +1,6 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { View, Text, StyleSheet, SectionList } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { Transaction } from '../../constants/types';
 import { CashflowProps } from '../../constants/props';
 import CategoryIcons from '../../components/CategoryIcons';
@@ -12,7 +13,7 @@ const CashflowScreen: React.FC<CashflowProps> = ({ navigation, route }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const getTransactions = async () => {
+  const getTransactions = useCallback(async () => {
     try {
       setIsLoading(true);
       const fetchedTransactions = await fetchTransactions(1);
@@ -23,25 +24,20 @@ const CashflowScreen: React.FC<CashflowProps> = ({ navigation, route }) => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  useEffect(() => {
-    getTransactions();
   }, []);
 
-  useEffect(() => {
-    if (route.params?.shouldRefresh) {
+  useFocusEffect(
+    useCallback(() => {
       getTransactions();
-      navigation.setParams({ shouldRefresh: false });
-    }
-  }, [route.params?.shouldRefresh]);
+    }, [getTransactions]),
+  );
 
   const groupedTransactions = useMemo(() => {
     if (!Array.isArray(transactions) || transactions.length === 0) {
       return [];
     }
 
-    const grouped = transactions.reverse().reduce((acc, transaction) => {
+    const grouped = [...transactions].reverse().reduce((acc, transaction) => {
       const date = new Date(transaction.date);
       const monthYear = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
