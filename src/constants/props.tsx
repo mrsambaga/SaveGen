@@ -1,15 +1,15 @@
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from './navigation';
+import { CashFlowStackParamList, RootStackParamList } from './navigation';
 import { RouteProp } from '@react-navigation/native';
 import { TopSpendingItem, Transaction } from './types';
 
 export type CashflowProps = {
-  navigation: StackNavigationProp<RootStackParamList, 'CashFlow'>;
-  route: RouteProp<RootStackParamList, 'CashFlow'>;
+  navigation: StackNavigationProp<CashFlowStackParamList, 'Transactions'>;
+  route: RouteProp<CashFlowStackParamList, 'Transactions'>;
 };
 
 export type SpendingChartProps = {
-  navigation: StackNavigationProp<RootStackParamList, 'CashFlow'>;
+  navigation: StackNavigationProp<CashFlowStackParamList, 'Transactions'>;
   transactions: Transaction[];
 };
 
