@@ -1,17 +1,24 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { View, Text, StyleSheet, SectionList } from 'react-native';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
+import { View, Text, StyleSheet, SectionList, Alert, TouchableOpacity } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { Transaction } from '../../constants/types';
 import { CashflowProps } from '../../constants/props';
 import CategoryIcons from '../../components/CategoryIcons';
 import { formatCurrency, shortenText } from '../../utils/Formatter';
 import SpendingChart from './SpendingChart';
-import { fetchTransactions } from '../../service/transactionService';
+import { deleteTransaction, fetchTransactions } from '../../service/transactionService';
 import { categoryIconLabelMap } from '../../constants/const';
+import { useTransactions } from '../../context/TransactionContext';
 
 const CashflowScreen: React.FC<CashflowProps> = ({ navigation, route }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const swipeableRefs = useRef<Map<string, Swipeable | null>>(new Map());
+  const { refreshTransactions } = useTransactions();
 
   const getTransactions = useCallback(async () => {
     try {
@@ -30,6 +37,60 @@ const CashflowScreen: React.FC<CashflowProps> = ({ navigation, route }) => {
     useCallback(() => {
       getTransactions();
     }, [getTransactions]),
+  );
+
+  const closeSwipeable = useCallback((id: string) => {
+    swipeableRefs.current.get(id)?.close();
+  }, []);
+
+  const handleDelete = useCallback(
+    (transaction: Transaction) => {
+      const id = transaction.id;
+      if (!id) return;
+
+      const label = categoryIconLabelMap[transaction.transaction_category] ?? 'this transaction';
+      const amount = formatCurrency(transaction.amount);
+
+      Alert.alert(
+        'Delete transaction?',
+        `${label} (${amount}) will be permanently removed.`,
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+            onPress: () => closeSwipeable(id),
+          },
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: async () => {
+              const previous = transactions;
+              setDeletingId(id);
+              setTransactions(prev => prev.filter(t => t.id !== id));
+              swipeableRefs.current.delete(id);
+
+              try {
+                await deleteTransaction(id);
+                refreshTransactions().catch(err =>
+                  console.warn('Failed to refresh transactions context:', err),
+                );
+              } catch (error) {
+                console.error('Error deleting transaction:', error);
+                setTransactions(previous);
+                Alert.alert(
+                  'Delete failed',
+                  'Could not delete the transaction. Please try again.',
+                );
+              } finally {
+                setDeletingId(null);
+              }
+            },
+          },
+        ],
+        { cancelable: true, onDismiss: () => closeSwipeable(id) },
+      );
+    },
+    [transactions, refreshTransactions, closeSwipeable],
   );
 
   const groupedTransactions = useMemo(() => {
@@ -60,28 +121,52 @@ const CashflowScreen: React.FC<CashflowProps> = ({ navigation, route }) => {
     </View>
   );
 
-  const renderTransactionItem = ({ item }: { item: Transaction }) => (
-    <View style={styles.transactionItem}>
-      <View>
-        <CategoryIcons iconName={item.transaction_category} />
-      </View>
-      <View style={styles.transactionLeft}>
-        <Text style={styles.transactionDescription}>{categoryIconLabelMap[item.transaction_category]}</Text>
-        {item.detail && (
-          <Text style={styles.transactionDate}>{shortenText(item.detail, 20)}</Text>
-        )}
-        <Text style={styles.transactionDate}>{formatDate(item.date)}</Text>
-      </View>
-      <Text
-        style={[
-          styles.transactionAmount,
-          item.transaction_type === 'debit' ? styles.expenseText : styles.incomeText,
-        ]}>
-        {item.transaction_type === 'debit' ? '-' : '+'}
-        {formatCurrency(item.amount)}
-      </Text>
-    </View>
+  const renderRightActions = (item: Transaction) => () => (
+    <TouchableOpacity
+      style={styles.deleteAction}
+      onPress={() => handleDelete(item)}
+      activeOpacity={0.8}>
+      <FontAwesomeIcon icon={faTrash} size={20} color="#fff" />
+      <Text style={styles.deleteActionText}>Delete</Text>
+    </TouchableOpacity>
   );
+
+  const renderTransactionItem = ({ item }: { item: Transaction }) => {
+    const id = item.id!;
+    const isDeleting = deletingId === id;
+
+    return (
+      <Swipeable
+        ref={ref => {
+          swipeableRefs.current.set(id, ref);
+        }}
+        renderRightActions={renderRightActions(item)}
+        overshootRight={false}
+        rightThreshold={40}
+        enabled={!isDeleting}>
+        <View style={[styles.transactionItem, isDeleting && styles.transactionItemDeleting]}>
+          <View>
+            <CategoryIcons iconName={item.transaction_category} />
+          </View>
+          <View style={styles.transactionLeft}>
+            <Text style={styles.transactionDescription}>{categoryIconLabelMap[item.transaction_category]}</Text>
+            {item.detail && (
+              <Text style={styles.transactionDate}>{shortenText(item.detail, 20)}</Text>
+            )}
+            <Text style={styles.transactionDate}>{formatDate(item.date)}</Text>
+          </View>
+          <Text
+            style={[
+              styles.transactionAmount,
+              item.transaction_type === 'debit' ? styles.expenseText : styles.incomeText,
+            ]}>
+            {item.transaction_type === 'debit' ? '-' : '+'}
+            {formatCurrency(item.amount)}
+          </Text>
+        </View>
+      </Swipeable>
+    );
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -194,6 +279,23 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
     paddingHorizontal: 15,
+    backgroundColor: '#fff',
+  },
+  transactionItemDeleting: {
+    opacity: 0.5,
+  },
+  deleteAction: {
+    backgroundColor: '#e74c3c',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 90,
+    flexDirection: 'column',
+  },
+  deleteActionText: {
+    color: '#fff',
+    fontSize: 12,
+    fontFamily: 'Montserrat-SemiBold',
+    marginTop: 4,
   },
   transactionLeft: {
     flex: 1,

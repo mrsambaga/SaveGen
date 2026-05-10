@@ -32,3 +32,14 @@ export const createTransaction = async (requestDTO: CreateTransactionRequestDTO)
     throw error;
   }
 };
+
+export const deleteTransaction = async (id: string | number): Promise<void> => {
+  try {
+    await axios.delete(`${path.DELETE_TRANSACTION}/${id}`);
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      throw new Error(`Failed to delete transaction: ${error.message}`);
+    }
+    throw error;
+  }
+};
