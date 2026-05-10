@@ -1,12 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import {
   VictoryBar,
   VictoryChart,
   VictoryAxis,
   VictoryGroup,
-  VictoryLegend,
-  VictoryLine,
 } from 'victory-native';
 import Button from '../../components/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -15,113 +13,196 @@ import { SpendingChartProps } from '../../constants/props';
 import { formatCurrency, formatCurrencyLabel } from '../../utils/Formatter';
 import { useUser } from '../../context/UserContext';
 
+const VISIBLE_MONTHS = 5;
+const MAX_MONTHS = 12;
+const CARD_MARGIN_HORIZONTAL = 15;
+const CARD_PADDING_HORIZONTAL = 15;
+const CONTAINER_HORIZONTAL_PADDING = (CARD_MARGIN_HORIZONTAL + CARD_PADDING_HORIZONTAL) * 2;
+const Y_AXIS_WIDTH = 50;
+const CHART_HEIGHT = 200;
+const CHART_PADDING_TOP = 20;
+const CHART_PADDING_BOTTOM = 35;
+const BUDGET_COLOR = '#7C5DFC';
+const INCOME_COLOR = '#13b062';
+const EXPENSE_COLOR = '#e74c3c';
+
 const SpendingChart: React.FC<SpendingChartProps> = ({ navigation, transactions }) => {
   const screenWidth = Dimensions.get('window').width;
   const { user } = useUser();
   const monthlyBudget = user?.monthly_budget ?? null;
   const hasBudget = typeof monthlyBudget === 'number' && monthlyBudget > 0;
+  const scrollRef = useRef<ScrollView>(null);
 
   const chartData = useMemo(() => {
-    const months = Array.from({ length: 5 }, (_, i) => {
-      const date = new Date(transactions[0] ? transactions[0].date : '');
-      date.setMonth(date.getMonth() - i);
-      return date.toLocaleDateString('en-US', { month: 'short' });
-    }).reverse();
+    const validDates = transactions
+      .map(t => new Date(t.date))
+      .filter(d => !isNaN(d.getTime()));
 
-    const incomeData = months.map(month => ({ x: month, y: 0 }));
-    const expensesData = months.map(month => ({ x: month, y: 0 }));
+    const now = new Date();
+    const currentYear = now.getFullYear();
+
+    let endAnchor: Date;
+    let start: Date;
+
+    if (validDates.length === 0) {
+      endAnchor = now;
+      start = new Date(endAnchor);
+      start.setMonth(start.getMonth() - (VISIBLE_MONTHS - 1));
+    } else {
+      const earliest = new Date(Math.min(...validDates.map(d => d.getTime())));
+      const latest = new Date(Math.max(...validDates.map(d => d.getTime())));
+      endAnchor = latest > now ? latest : now;
+
+      const cap = new Date(endAnchor);
+      cap.setMonth(cap.getMonth() - (MAX_MONTHS - 1));
+      start = earliest > cap ? earliest : cap;
+
+      const minStart = new Date(endAnchor);
+      minStart.setMonth(minStart.getMonth() - (VISIBLE_MONTHS - 1));
+      if (start > minStart) start = minStart;
+    }
+
+    const months: Array<{ key: string; label: string; year: number; month: number }> = [];
+    const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
+    const endMonth = new Date(endAnchor.getFullYear(), endAnchor.getMonth(), 1);
+    while (cursor <= endMonth) {
+      const year = cursor.getFullYear();
+      const month = cursor.getMonth();
+      const monthShort = cursor.toLocaleDateString('en-US', { month: 'short' });
+      const yearSuffix = year !== currentYear ? ` ${String(year).slice(-2)}` : '';
+      months.push({
+        key: `${year}-${month}`,
+        label: `${monthShort}${yearSuffix}`,
+        year,
+        month,
+      });
+      cursor.setMonth(cursor.getMonth() + 1);
+    }
+
+    const incomeData = months.map(m => ({ x: m.key, y: 0 }));
+    const expensesData = months.map(m => ({ x: m.key, y: 0 }));
+    const indexByKey = new Map(months.map((m, i) => [m.key, i]));
 
     transactions.forEach(transaction => {
       const date = new Date(transaction.date);
-      const monthIndex = months.indexOf(date.toLocaleDateString('en-US', { month: 'short' }));
-      
-      if (monthIndex !== -1) {
-        if (transaction.transaction_type === 'credit') {
-          incomeData[monthIndex].y += transaction.amount;
-        } 
-        if (transaction.transaction_type === 'debit') {
-          expensesData[monthIndex].y += transaction.amount;
-        }
+      if (isNaN(date.getTime())) return;
+      const idx = indexByKey.get(`${date.getFullYear()}-${date.getMonth()}`);
+      if (idx == null) return;
+      if (transaction.transaction_type === 'credit') {
+        incomeData[idx].y += transaction.amount;
+      } else if (transaction.transaction_type === 'debit') {
+        expensesData[idx].y += transaction.amount;
       }
     });
 
-    const budgetLineData =
-      hasBudget && monthlyBudget != null
-        ? months.map(month => ({ x: month, y: monthlyBudget }))
-        : [];
+    return { months, incomeData, expensesData };
+  }, [transactions]);
 
-    return { incomeData, expensesData, budgetLineData };
-  }, [transactions, hasBudget, monthlyBudget]);
+  const containerInnerWidth = screenWidth - CONTAINER_HORIZONTAL_PADDING;
+  const scrollableInnerWidth = containerInnerWidth - Y_AXIS_WIDTH;
+  const slotWidth = scrollableInnerWidth / VISIBLE_MONTHS;
+  const chartWidth = chartData.months.length * slotWidth;
+  const xTickValues = chartData.months.map(m => m.key);
+  const xTickLabels = new Map(chartData.months.map(m => [m.key, m.label]));
+
+  const yMax = useMemo(() => {
+    const incomeMax = Math.max(0, ...chartData.incomeData.map(d => d.y));
+    const expenseMax = Math.max(0, ...chartData.expensesData.map(d => d.y));
+    const budgetMax = hasBudget && monthlyBudget != null ? monthlyBudget : 0;
+    const dataMax = Math.max(incomeMax, expenseMax, budgetMax);
+    return dataMax === 0 ? 1 : dataMax * 1.1;
+  }, [chartData, hasBudget, monthlyBudget]);
+
+  useEffect(() => {
+    if (chartData.months.length <= VISIBLE_MONTHS) return;
+    const id = setTimeout(() => {
+      scrollRef.current?.scrollToEnd({ animated: false });
+    }, 50);
+    return () => clearTimeout(id);
+  }, [chartData.months.length]);
 
   return (
     <View style={styles.chartContainer}>
       <View style={styles.chartHeader}>
         <Text style={styles.chartTitle}>Income vs Spending</Text>
       </View>
-      <ScrollView horizontal>
-        <View style={{ width: '100%' }}>
+      <View style={styles.chartRow}>
+        <View style={styles.yAxisColumn} pointerEvents="none">
           <VictoryChart
-            padding={{ top: 20, bottom: 35, left: 35, right: 10 }}
-            width={screenWidth / 1.2}
-            height={200}
-          >
-            <VictoryAxis
-              tickFormat={(tick) => tick}
-              style={{
-                tickLabels: styles.label
-              }}
-            />
+            padding={{ top: CHART_PADDING_TOP, bottom: CHART_PADDING_BOTTOM, left: 45, right: 0 }}
+            width={Y_AXIS_WIDTH}
+            height={CHART_HEIGHT}
+            domain={{ y: [0, yMax] }}>
             <VictoryAxis
               dependentAxis
               tickFormat={(tick) => formatCurrencyLabel(tick)}
-              style={{
-                tickLabels: styles.label
-              }}
+              style={{ tickLabels: styles.label }}
             />
-            <VictoryGroup
-              offset={20}
-              colorScale={["#13b062", "#e74c3c"]}
-            >
-              <VictoryBar
-                data={chartData.incomeData}
-                barWidth={15}
-                style={{ data: { fill: "#13b062" } }}
-              />
-              <VictoryBar
-                data={chartData.expensesData}
-                barWidth={15}
-                style={{ data: { fill: "#e74c3c" } }}
-              />
-            </VictoryGroup>
-            {chartData.budgetLineData.length > 0 && (
-              <VictoryLine
-                data={chartData.budgetLineData}
+          </VictoryChart>
+        </View>
+        <ScrollView
+          ref={scrollRef}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.scrollableChart}>
+          <VictoryChart
+            padding={{ top: CHART_PADDING_TOP, bottom: CHART_PADDING_BOTTOM, left: 0, right: 0 }}
+            width={chartWidth}
+            height={CHART_HEIGHT}
+            domain={{ y: [0, yMax] }}
+            domainPadding={{ x: slotWidth / 2 }}>
+            <VictoryAxis
+              tickValues={xTickValues}
+              tickFormat={(tick: string) => xTickLabels.get(tick) ?? tick}
+              style={{ tickLabels: styles.label }}
+            />
+            {hasBudget && monthlyBudget != null && (
+              <VictoryAxis
+                dependentAxis
+                tickValues={[monthlyBudget]}
+                tickFormat={() => ''}
                 style={{
-                  data: {
-                    stroke: '#7C5DFC',
-                    strokeWidth: 2,
+                  axis: { stroke: 'transparent' },
+                  ticks: { stroke: 'transparent' },
+                  grid: {
+                    stroke: BUDGET_COLOR,
                     strokeDasharray: '6,4',
+                    strokeWidth: 2,
                   },
                 }}
               />
             )}
+            <VictoryGroup offset={20} colorScale={[INCOME_COLOR, EXPENSE_COLOR]}>
+              <VictoryBar
+                data={chartData.incomeData}
+                barWidth={15}
+                style={{ data: { fill: INCOME_COLOR } }}
+              />
+              <VictoryBar
+                data={chartData.expensesData}
+                barWidth={15}
+                style={{ data: { fill: EXPENSE_COLOR } }}
+              />
+            </VictoryGroup>
           </VictoryChart>
+        </ScrollView>
+      </View>
+      <View style={styles.legendRow}>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendDot, { backgroundColor: INCOME_COLOR }]} />
+          <Text style={styles.legendText}>Income</Text>
         </View>
-      </ScrollView>
-      <VictoryLegend
-        x={screenWidth / 8}
-        height={20}
-        orientation="horizontal"
-        gutter={20}
-        style={{ labels: styles.legend }}
-        data={[
-          { name: "Income", symbol: { fill: "#13b062" } },
-          { name: "Expenses", symbol: { fill: "#e74c3c" } },
-          ...(hasBudget
-            ? [{ name: "Budget", symbol: { fill: "#7C5DFC", type: "minus" as const } }]
-            : []),
-        ]}
-      />
+        <View style={styles.legendItem}>
+          <View style={[styles.legendDot, { backgroundColor: EXPENSE_COLOR }]} />
+          <Text style={styles.legendText}>Expenses</Text>
+        </View>
+        {hasBudget && (
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDash, { backgroundColor: BUDGET_COLOR }]} />
+            <Text style={styles.legendText}>Budget</Text>
+          </View>
+        )}
+      </View>
       {hasBudget && monthlyBudget != null && (
         <Text style={styles.budgetCaption}>
           Monthly budget: {formatCurrency(monthlyBudget)}
@@ -158,11 +239,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  legend: {
-    fontSize: 14,
-    fontFamily: 'Montserrat-SemiBold',
-    color: '#201c5c',
-  },
   label: {
     fontSize: 12,
     fontFamily: 'Montserrat',
@@ -181,9 +257,52 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat-Bold',
     color: '#201c5c',
   },
+  chartRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  yAxisColumn: {
+    width: Y_AXIS_WIDTH,
+  },
+  scrollableChart: {
+    flex: 1,
+  },
+  legendRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    marginTop: 8,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 10,
+  },
+  legendDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 6,
+  },
+  legendDash: {
+    width: 14,
+    height: 3,
+    borderRadius: 1.5,
+    marginRight: 6,
+  },
+  legendText: {
+    fontSize: 13,
+    fontFamily: 'Montserrat-SemiBold',
+    color: '#201c5c',
+    lineHeight: 18,
+  },
   budgetCaption: {
-    marginTop: 4,
+    marginTop: 6,
+    paddingBottom: 4,
+    paddingHorizontal: 12,
     fontSize: 12,
+    lineHeight: 18,
     fontFamily: 'Montserrat-SemiBold',
     color: '#7C5DFC',
     textAlign: 'center',
