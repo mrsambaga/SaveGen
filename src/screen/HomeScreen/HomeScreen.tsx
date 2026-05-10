@@ -1,6 +1,7 @@
 import { Image, StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
 import { Text } from 'react-native-gesture-handler';
 import Button from '../../components/Button';
+import BudgetModal from '../../components/BudgetModal';
 import { HomeProps, TopSpendingProps } from '../../constants/props';
 import { useMemo, useState, useEffect } from 'react';
 import { formatCurrency } from '../../utils/Formatter';
@@ -10,6 +11,7 @@ import { useUser } from '../../context/UserContext';
 import {
   faEye,
   faEyeSlash,
+  faPenToSquare,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import CategoryIcons from '../../components/CategoryIcons';
@@ -17,12 +19,16 @@ import { categoryIconLabelMap } from '../../constants/const';
 
 const HomeScreen: React.FC<HomeProps> = ({ navigation }) => {
   const { transactions } = useTransactions();
-  const { user, refreshUser } = useUser();
+  const { user, refreshUser, updateUserData } = useUser();
   const [showBalance, setShowBalance] = useState(false);
+  const [isBudgetModalVisible, setBudgetModalVisible] = useState(false);
 
   useEffect(() => {
     refreshUser();
   }, []);
+
+  const monthlyBudget = user?.monthly_budget ?? null;
+  const hasBudget = typeof monthlyBudget === 'number' && monthlyBudget > 0;
 
   const thisMonthSpending = useMemo(() => {
     const currentDate = new Date();
@@ -81,6 +87,22 @@ const HomeScreen: React.FC<HomeProps> = ({ navigation }) => {
 
     return categoriesArray.sort((a, b) => b.totalAmount - a.totalAmount).slice(0, 3);
   }, [transactions]);
+
+  const budgetProgress = useMemo(() => {
+    if (!hasBudget || monthlyBudget == null) {
+      return { percent: 0, remaining: 0, isOver: false };
+    }
+    const percent = Math.min(thisMonthSpending / monthlyBudget, 1);
+    return {
+      percent,
+      remaining: monthlyBudget - thisMonthSpending,
+      isOver: thisMonthSpending > monthlyBudget,
+    };
+  }, [hasBudget, monthlyBudget, thisMonthSpending]);
+
+  const handleSaveBudget = async (amount: number) => {
+    await updateUserData({ monthly_budget: amount });
+  };
 
   const TopSpending: React.FC<TopSpendingProps> = ({ item }) => {
     return (
@@ -145,20 +167,61 @@ const HomeScreen: React.FC<HomeProps> = ({ navigation }) => {
       <View style={styles.budgetingContainer}>
         <Text style={styles.heading}>Budgeting</Text>
         <View style={styles.budgeting}>
-          <Text style={styles.heading}>Set your budget</Text>
-          <Text style={styles.text}>Save more money</Text>
-          <View style={styles.budgetingBottom}>
-            <Button
-              title="Setup now"
-              buttonStyle={styles.button}
-              textStyle={styles.buttonText}
-              onPress={() => navigation.navigate('Register')}
-            />
-            <Image
-              source={require('../../../assets/icons/budgeting.png')}
-              style={styles.budgetingIcon}
-            />
-          </View>
+          {hasBudget && monthlyBudget != null ? (
+            <>
+              <View style={styles.budgetHeaderRow}>
+                <View style={styles.budgetHeaderTextWrapper}>
+                  <Text style={styles.heading}>Monthly Budget</Text>
+                  <Text style={styles.budgetSubText}>
+                    {budgetProgress.isOver
+                      ? `${formatCurrency(Math.abs(budgetProgress.remaining))} over budget`
+                      : `${formatCurrency(budgetProgress.remaining)} left this month`}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.editBudgetButton}
+                  onPress={() => setBudgetModalVisible(true)}
+                  activeOpacity={0.7}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                  <FontAwesomeIcon icon={faPenToSquare} size={18} color="#201c5c" />
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.budgetAmounts}>
+                <Text style={budgetProgress.isOver && styles.budgetOverText}>
+                  {formatCurrency(thisMonthSpending)}
+                </Text>{' '}
+                / {formatCurrency(monthlyBudget)}
+              </Text>
+              <View style={styles.budgetProgressTrack}>
+                <View
+                  style={[
+                    styles.budgetProgressFill,
+                    { width: `${Math.round(budgetProgress.percent * 100)}%` },
+                    budgetProgress.isOver && styles.budgetProgressFillOver,
+                  ]}
+                />
+              </View>
+            </>
+          ) : (
+            <>
+              <Text style={styles.heading}>Set your budget</Text>
+              <Text style={styles.text}>
+                Control your spending and stay on track with your budget.
+              </Text>
+              <View style={styles.budgetingBottom}>
+                <Button
+                  title="Setup now"
+                  buttonStyle={styles.button}
+                  textStyle={styles.buttonText}
+                  onPress={() => setBudgetModalVisible(true)}
+                />
+                <Image
+                  source={require('../../../assets/icons/budgeting.png')}
+                  style={styles.budgetingIcon}
+                />
+              </View>
+            </>
+          )}
         </View>
       </View>
       <View style={styles.topSpendingContainer}>
@@ -174,6 +237,13 @@ const HomeScreen: React.FC<HomeProps> = ({ navigation }) => {
           <Text style={styles.heading}>No spending data for this month yet.</Text>
         )}
       </View>
+
+      <BudgetModal
+        visible={isBudgetModalVisible}
+        initialBudget={monthlyBudget}
+        onClose={() => setBudgetModalVisible(false)}
+        onSave={handleSaveBudget}
+      />
     </ScrollView>
   );
 };
@@ -258,6 +328,54 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1.5,
     borderColor: '#CCCCCC',
+  },
+  budgetHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 5,
+  },
+  budgetHeaderTextWrapper: {
+    flex: 1,
+    marginRight: 12,
+  },
+  budgetSubText: {
+    fontSize: 13,
+    fontFamily: 'Montserrat-SemiBold',
+    color: '#8B8AA3',
+    marginTop: 2,
+  },
+  budgetAmounts: {
+    fontSize: 18,
+    fontFamily: 'Montserrat-SemiBold',
+    color: '#201c5c',
+    marginTop: 12,
+  },
+  budgetOverText: {
+    color: '#e74c3c',
+  },
+  budgetProgressTrack: {
+    marginTop: 10,
+    height: 10,
+    borderRadius: 30,
+    backgroundColor: '#F1EEFF',
+    overflow: 'hidden',
+  },
+  budgetProgressFill: {
+    height: '100%',
+    backgroundColor: '#8290ed',
+    borderRadius: 30,
+  },
+  budgetProgressFillOver: {
+    backgroundColor: '#e74c3c',
+  },
+  editBudgetButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#F1EEFF',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   budgetingBottom: {
     flexDirection: 'row',

@@ -1,14 +1,25 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
-import { VictoryBar, VictoryChart, VictoryAxis, VictoryGroup, VictoryLegend } from 'victory-native';
+import {
+  VictoryBar,
+  VictoryChart,
+  VictoryAxis,
+  VictoryGroup,
+  VictoryLegend,
+  VictoryLine,
+} from 'victory-native';
 import Button from '../../components/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPieChart } from '@fortawesome/free-solid-svg-icons';
 import { SpendingChartProps } from '../../constants/props';
-import { formatCurrencyLabel } from '../../utils/Formatter';
+import { formatCurrency, formatCurrencyLabel } from '../../utils/Formatter';
+import { useUser } from '../../context/UserContext';
 
 const SpendingChart: React.FC<SpendingChartProps> = ({ navigation, transactions }) => {
   const screenWidth = Dimensions.get('window').width;
+  const { user } = useUser();
+  const monthlyBudget = user?.monthly_budget ?? null;
+  const hasBudget = typeof monthlyBudget === 'number' && monthlyBudget > 0;
 
   const chartData = useMemo(() => {
     const months = Array.from({ length: 5 }, (_, i) => {
@@ -34,8 +45,13 @@ const SpendingChart: React.FC<SpendingChartProps> = ({ navigation, transactions 
       }
     });
 
-    return { incomeData, expensesData };
-  }, [transactions]);
+    const budgetLineData =
+      hasBudget && monthlyBudget != null
+        ? months.map(month => ({ x: month, y: monthlyBudget }))
+        : [];
+
+    return { incomeData, expensesData, budgetLineData };
+  }, [transactions, hasBudget, monthlyBudget]);
 
   return (
     <View style={styles.chartContainer}>
@@ -77,20 +93,40 @@ const SpendingChart: React.FC<SpendingChartProps> = ({ navigation, transactions 
                 style={{ data: { fill: "#e74c3c" } }}
               />
             </VictoryGroup>
+            {chartData.budgetLineData.length > 0 && (
+              <VictoryLine
+                data={chartData.budgetLineData}
+                style={{
+                  data: {
+                    stroke: '#7C5DFC',
+                    strokeWidth: 2,
+                    strokeDasharray: '6,4',
+                  },
+                }}
+              />
+            )}
           </VictoryChart>
         </View>
       </ScrollView>
       <VictoryLegend
-        x={screenWidth / 5.5}
+        x={screenWidth / 8}
         height={20}
         orientation="horizontal"
-        gutter={30}
+        gutter={20}
         style={{ labels: styles.legend }}
         data={[
           { name: "Income", symbol: { fill: "#13b062" } },
           { name: "Expenses", symbol: { fill: "#e74c3c" } },
+          ...(hasBudget
+            ? [{ name: "Budget", symbol: { fill: "#7C5DFC", type: "minus" as const } }]
+            : []),
         ]}
       />
+      {hasBudget && monthlyBudget != null && (
+        <Text style={styles.budgetCaption}>
+          Monthly budget: {formatCurrency(monthlyBudget)}
+        </Text>
+      )}
       <View style={styles.overviewSection}>
         <Button
           title="Overview"
@@ -144,6 +180,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontFamily: 'Montserrat-Bold',
     color: '#201c5c',
+  },
+  budgetCaption: {
+    marginTop: 4,
+    fontSize: 12,
+    fontFamily: 'Montserrat-SemiBold',
+    color: '#7C5DFC',
+    textAlign: 'center',
   },
   overviewSection: {
     marginTop: 20,

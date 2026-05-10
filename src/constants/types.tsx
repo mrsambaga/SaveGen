@@ -1,6 +1,7 @@
 export type User = {
   username: string;
   email: string;
+  monthly_budget?: number | null;
 };
 
 export type Transaction = {
