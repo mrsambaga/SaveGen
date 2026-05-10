@@ -98,7 +98,11 @@ const CashflowScreen: React.FC<CashflowProps> = ({ navigation, route }) => {
       return [];
     }
 
-    const grouped = [...transactions].reverse().reduce((acc, transaction) => {
+    const sorted = [...transactions].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
+
+    const grouped = sorted.reduce((acc, transaction) => {
       const date = new Date(transaction.date);
       const monthYear = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
@@ -109,10 +113,12 @@ const CashflowScreen: React.FC<CashflowProps> = ({ navigation, route }) => {
       return acc;
     }, {} as Record<string, Transaction[]>);
 
-    return Object.entries(grouped).map(([title, data]) => ({
-      title,
-      data,
-    }));
+    return Object.entries(grouped)
+      .map(([title, data]) => ({ title, data }))
+      .sort(
+        (a, b) =>
+          new Date(b.data[0].date).getTime() - new Date(a.data[0].date).getTime(),
+      );
   }, [transactions]);
 
   const renderSectionHeader = ({ section: { title } }: { section: { title: string } }) => (
