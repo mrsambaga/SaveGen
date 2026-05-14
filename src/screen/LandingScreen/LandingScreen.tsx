@@ -1,8 +1,8 @@
-import {ImageBackground, StyleSheet, Text, View} from 'react-native';
+import { ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Button from '../../components/Button';
-import {LandingProps} from '../../constants/props';
+import { LandingProps } from '../../constants/props';
 
-const LandingScreen: React.FC<LandingProps> = ({navigation}) => {
+const LandingScreen: React.FC<LandingProps> = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <ImageBackground
@@ -18,11 +18,19 @@ const LandingScreen: React.FC<LandingProps> = ({navigation}) => {
           </View>
           <View style={styles.buttonContainer}>
             <Button
-              title="Start Now"
+              title="Get Started"
               onPress={() => navigation.navigate('Register')}
-              buttonStyle={styles.button}
-              textStyle={styles.buttonText}
+              buttonStyle={styles.primaryButton}
+              textStyle={styles.primaryButtonText}
             />
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={() => navigation.navigate('Login')}
+              activeOpacity={0.7}>
+              <Text style={styles.secondaryButtonText}>
+                I already have an account
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ImageBackground>
@@ -43,8 +51,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: '5%',
   },
   buttonContainer: {
-    marginBottom: '20%',
+    marginBottom: '15%',
     paddingHorizontal: '5%',
+    gap: 14,
   },
   title: {
     fontSize: 60,
@@ -58,27 +67,37 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     textAlign: 'center',
   },
-  buttonText: {
-    fontSize: 24,
+  primaryButton: {
+    backgroundColor: '#84e1ec',
+    paddingVertical: 12,
+    paddingHorizontal: 70,
+    borderRadius: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  primaryButtonText: {
+    fontSize: 22,
     fontFamily: 'Montserrat-SemiBold',
     color: '#201c5c',
     textAlign: 'center',
+  },
+  secondaryButton: {
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  secondaryButtonText: {
+    fontSize: 16,
+    fontFamily: 'Montserrat-SemiBold',
+    color: '#ffffff',
+    textDecorationLine: 'underline',
   },
   backgroundImage: {
     flex: 1,
     width: '100%',
     height: '100%',
     alignItems: 'center',
-  },
-  button: {
-    backgroundColor: '#84e1ec',
-    paddingVertical: 10,
-    paddingHorizontal: 70,
-    borderRadius: 15,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
   },
 });
 

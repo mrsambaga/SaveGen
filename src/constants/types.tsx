@@ -1,7 +1,10 @@
 export type User = {
+  id?: number;
   username: string;
   email: string;
+  is_guest?: boolean;
   monthly_budget?: number | null;
+  created_at?: string;
 };
 
 export type Transaction = {

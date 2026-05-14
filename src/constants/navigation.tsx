@@ -3,9 +3,9 @@ import { Transaction } from './types';
 export type RootStackParamList = {
   Landing: undefined;
   Register: undefined;
+  Login: undefined;
   MainTabs: undefined;
   Home: undefined;
-  Login: undefined;
   NewTransaction: undefined;
   CashFlow: { shouldRefresh?: boolean } | undefined;
   Account: undefined;

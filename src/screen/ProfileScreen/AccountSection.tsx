@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -12,12 +13,14 @@ import {
   View,
 } from 'react-native';
 import { useUser } from '../../context/UserContext';
+import { useAuth } from '../../context/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import {
   faChevronRight,
   faEnvelope,
   faLock,
   faPencil,
+  faRightFromBracket,
   faUser,
 } from '@fortawesome/free-solid-svg-icons';
 import ProfileImage from './ProfileImage';
@@ -29,10 +32,31 @@ const BORDER = '#ECEAF5';
 
 const AccountSection: React.FC = () => {
   const { user, updateUserData } = useUser();
+  const { signOut } = useAuth();
   const [isModalVisible, setModalVisible] = useState(false);
 
   const username = user?.username || 'Not set';
   const email = user?.email || 'Not set';
+  const isGuest = user?.is_guest === true;
+
+  const handleSignOut = () => {
+    Alert.alert(
+      isGuest ? 'Leave guest session?' : 'Log out',
+      isGuest
+        ? 'Your data is tied to this device. If you log out without creating a real account you will lose access to it.'
+        : 'You will need to log in again to access your data.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: isGuest ? 'Leave anyway' : 'Log out',
+          style: 'destructive',
+          onPress: () => {
+            signOut();
+          },
+        },
+      ],
+    );
+  };
 
   return (
     <ScrollView
@@ -96,6 +120,26 @@ const AccountSection: React.FC = () => {
       <Text style={styles.helperText}>
         Your email is used to sign in and cannot be changed.
       </Text>
+
+      {isGuest && (
+        <View style={styles.guestBanner}>
+          <Text style={styles.guestBannerTitle}>You're using a guest session</Text>
+          <Text style={styles.guestBannerBody}>
+            Your data lives only on this device. Sign up to back it up and use
+            SaveGen on multiple devices.
+          </Text>
+        </View>
+      )}
+
+      <TouchableOpacity
+        style={styles.signOutButton}
+        onPress={handleSignOut}
+        activeOpacity={0.8}>
+        <FontAwesomeIcon icon={faRightFromBracket} size={14} color="#e74c3c" />
+        <Text style={styles.signOutText}>
+          {isGuest ? 'Leave guest session' : 'Log out'}
+        </Text>
+      </TouchableOpacity>
 
       <EditUsernameModal
         visible={isModalVisible}
@@ -333,6 +377,43 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat',
     color: MUTED,
     lineHeight: 16,
+  },
+  guestBanner: {
+    marginTop: 18,
+    padding: 14,
+    borderRadius: 12,
+    backgroundColor: '#FFF6E5',
+    borderWidth: 1,
+    borderColor: '#F6D58A',
+  },
+  guestBannerTitle: {
+    fontSize: 13,
+    fontFamily: 'Montserrat-Bold',
+    color: '#8a5a00',
+    marginBottom: 4,
+  },
+  guestBannerBody: {
+    fontSize: 12,
+    fontFamily: 'Montserrat-SemiBold',
+    color: '#a26a0e',
+    lineHeight: 16,
+  },
+  signOutButton: {
+    marginTop: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#fbd6d2',
+    backgroundColor: '#fff5f4',
+  },
+  signOutText: {
+    fontSize: 15,
+    fontFamily: 'Montserrat-SemiBold',
+    color: '#e74c3c',
   },
   overlay: {
     flex: 1,

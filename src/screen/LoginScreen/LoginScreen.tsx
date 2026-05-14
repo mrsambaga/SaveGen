@@ -1,47 +1,42 @@
 import {
   ActivityIndicator,
   Alert,
-  Image,
   ImageBackground,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import FormInput from '../../components/FormInput';
 import { useState } from 'react';
+import FormInput from '../../components/FormInput';
 import Divider from '../../components/Divider';
 import Button from '../../components/Button';
-import { RegisterProps } from '../../constants/props';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../constants/navigation';
 import { useAuth } from '../../context/AuthContext';
 
-const RegisterScreen: React.FC<RegisterProps> = ({ navigation }) => {
-  const { signUp, signInAsGuest } = useAuth();
-  const [username, setUsername] = useState('');
+type LoginScreenProps = {
+  navigation: StackNavigationProp<RootStackParamList, 'Login'>;
+};
+
+const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
+  const { signIn, signInAsGuest } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [guestSubmitting, setGuestSubmitting] = useState(false);
 
-  const handleSignUp = async () => {
-    if (!username.trim() || !email.trim() || !password) {
-      Alert.alert('Missing fields', 'Please fill in all fields to continue.');
+  const handleLogin = async () => {
+    if (!email.trim() || !password) {
+      Alert.alert('Missing fields', 'Please enter your email and password.');
       return;
     }
-    if (password.length < 6) {
-      Alert.alert(
-        'Weak password',
-        'Password must be at least 6 characters long.',
-      );
-      return;
-    }
-
     try {
       setSubmitting(true);
-      await signUp(username.trim(), email.trim(), password);
+      await signIn(email.trim(), password);
     } catch (error) {
       Alert.alert(
-        'Sign up failed',
+        'Login failed',
         error instanceof Error ? error.message : 'Please try again.',
       );
     } finally {
@@ -63,13 +58,6 @@ const RegisterScreen: React.FC<RegisterProps> = ({ navigation }) => {
     }
   };
 
-  const handleGoogle = () => {
-    Alert.alert(
-      'Coming soon',
-      'Google sign-in needs a few setup steps before it can be used. Stay tuned.',
-    );
-  };
-
   return (
     <View style={styles.container}>
       <ImageBackground
@@ -78,18 +66,11 @@ const RegisterScreen: React.FC<RegisterProps> = ({ navigation }) => {
         resizeMode="cover">
         <View style={styles.contentContainer}>
           <View style={styles.textContainer}>
-            <Text style={styles.title}>Sign up now</Text>
-            <Text style={styles.text}>Join SaveGen and save your money</Text>
+            <Text style={styles.title}>Welcome back</Text>
+            <Text style={styles.text}>Log in to continue saving</Text>
           </View>
           <View style={styles.formContainer}>
             <View style={styles.inputFormContainer}>
-              <FormInput
-                title="Username"
-                placeholder="Your name"
-                value={username}
-                onChangeText={setUsername}
-                autoCapitalize="words"
-              />
               <FormInput
                 title="Email Address"
                 placeholder="yours@email.com"
@@ -99,43 +80,27 @@ const RegisterScreen: React.FC<RegisterProps> = ({ navigation }) => {
               />
               <FormInput
                 title="Password"
-                placeholder="At least 6 characters"
+                placeholder="*************"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={true}
               />
               <Button
                 buttonStyle={styles.primaryButton}
-                title="Sign up"
-                onPress={handleSignUp}
+                title={submitting ? 'Logging in...' : 'Log in'}
+                onPress={handleLogin}
                 activeOpacity={submitting ? 1 : 0.8}>
                 {submitting ? (
-                  <ActivityIndicator color="#ffffff" />
+                  <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.primaryButtonText}>Sign up</Text>
+                  <Text style={styles.primaryButtonText}>Log in</Text>
                 )}
               </Button>
             </View>
 
-            <Divider text="or continue with" />
+            <Divider text="or" />
 
             <View style={styles.buttonContainer}>
-              <Button
-                title="Continue with Google"
-                onPress={handleGoogle}
-                buttonStyle={styles.googleButtonContainer}>
-                <View style={styles.googleIconContainer}>
-                  <Image
-                    source={require('../../../assets/icons/google.png')}
-                    style={styles.icons}
-                  />
-                </View>
-                <View style={styles.loginTextContainer}>
-                  <Text style={styles.providerButtonText}>
-                    Continue with Google
-                  </Text>
-                </View>
-              </Button>
               <Button
                 title="Continue as Guest"
                 onPress={handleGuest}
@@ -144,19 +109,17 @@ const RegisterScreen: React.FC<RegisterProps> = ({ navigation }) => {
                 {guestSubmitting ? (
                   <ActivityIndicator color="#201c5c" />
                 ) : (
-                  <Text style={styles.guestButtonText}>
-                    Continue as Guest
-                  </Text>
+                  <Text style={styles.guestButtonText}>Continue as Guest</Text>
                 )}
               </Button>
             </View>
 
             <TouchableOpacity
               style={styles.footerLink}
-              onPress={() => navigation.navigate('Login')}>
+              onPress={() => navigation.navigate('Register')}>
               <Text style={styles.footerText}>
-                Already have an account?{' '}
-                <Text style={styles.footerLinkText}>Log in</Text>
+                Don't have an account?{' '}
+                <Text style={styles.footerLinkText}>Sign up</Text>
               </Text>
             </TouchableOpacity>
           </View>
@@ -183,22 +146,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   contentContainer: {
-    gap: 30,
+    gap: 40,
     width: '100%',
   },
   inputFormContainer: {
-    gap: 16,
-    marginBottom: 18,
+    gap: 20,
+    marginBottom: 25,
   },
   textContainer: {
-    marginTop: '15%',
+    marginTop: '25%',
     paddingHorizontal: '5%',
   },
   primaryButton: {
     backgroundColor: '#201c5c',
     paddingVertical: 12,
     borderRadius: 15,
-    marginTop: 6,
   },
   primaryButtonText: {
     fontSize: 16,
@@ -207,49 +169,27 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   buttonContainer: {
-    gap: 12,
-    marginTop: 14,
+    gap: 15,
+    marginTop: 30,
   },
   formContainer: {
     paddingHorizontal: '5%',
     backgroundColor: '#ffffff',
-    paddingVertical: 30,
+    paddingVertical: 40,
     height: '100%',
     borderRadius: 30,
   },
   title: {
-    fontSize: 36,
+    fontSize: 40,
     fontFamily: 'Montserrat-Bold',
     color: '#ffffff',
     textAlign: 'center',
   },
   text: {
-    fontSize: 18,
+    fontSize: 20,
     fontFamily: 'Montserrat-SemiBold',
     color: '#ffffff',
     textAlign: 'center',
-  },
-  providerButtonText: {
-    fontSize: 16,
-    fontFamily: 'Montserrat-SemiBold',
-    color: '#ffffff',
-    textAlign: 'center',
-  },
-  icons: {
-    width: 20,
-    height: 20,
-  },
-  googleButtonContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 30,
-    backgroundColor: '#201c5c',
-    paddingVertical: 12,
-    borderRadius: 15,
-  },
-  googleIconContainer: {
-    padding: 2,
-    backgroundColor: '#ffffff',
-    borderRadius: 40,
   },
   guestButtonContainer: {
     paddingHorizontal: 30,
@@ -266,7 +206,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   footerLink: {
-    marginTop: 20,
+    marginTop: 24,
     alignItems: 'center',
   },
   footerText: {
@@ -280,4 +220,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RegisterScreen;
+export default LoginScreen;

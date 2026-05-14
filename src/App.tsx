@@ -5,18 +5,21 @@ import { NavigationContainer } from '@react-navigation/native';
 import StackNavigation from './navigation/StackNavigation';
 import { TransactionProvider } from './context/TransactionContext';
 import { UserProvider } from './context/UserContext';
+import { AuthProvider } from './context/AuthContext';
 
 const App: React.FC = () => {
   return (
     <GestureHandlerRootView style={styles.container}>
       <SafeAreaView style={styles.container}>
-        <UserProvider>
-          <TransactionProvider>
-            <NavigationContainer>
-              <StackNavigation />
-            </NavigationContainer>
-          </TransactionProvider>
-        </UserProvider>
+        <AuthProvider>
+          <UserProvider>
+            <TransactionProvider>
+              <NavigationContainer>
+                <StackNavigation />
+              </NavigationContainer>
+            </TransactionProvider>
+          </UserProvider>
+        </AuthProvider>
       </SafeAreaView>
     </GestureHandlerRootView>
   );

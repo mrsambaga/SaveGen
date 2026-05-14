@@ -1,16 +1,11 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from 'react';
+import React, { createContext, ReactNode, useContext } from 'react';
 import { User } from '../constants/types';
-import { fetchUser, updateUser } from '../service/UserService';
+import { updateUser } from '../service/UserService';
+import { useAuth } from './AuthContext';
 
 type UserContextProps = {
   user: User | null;
-  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  setUser: (user: User) => void;
   refreshUser: () => Promise<void>;
   updateUserData: (userData: Partial<User>) => Promise<void>;
 };
@@ -18,11 +13,10 @@ type UserContextProps = {
 const UserContext = createContext<UserContextProps | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const { user, setUser } = useAuth();
 
   const refreshUser = async () => {
-    const fetched = await fetchUser('sam@gmail.com');
-    setUser(fetched);
+
   };
 
   const updateUserData = async (userData: Partial<User>) => {
@@ -31,13 +25,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     setUser(updated);
   };
 
-  useEffect(() => {
-    refreshUser();
-  }, []);
-
   return (
-    <UserContext.Provider
-      value={{ user, setUser, refreshUser, updateUserData }}>
+    <UserContext.Provider value={{ user, setUser, refreshUser, updateUserData }}>
       {children}
     </UserContext.Provider>
   );
