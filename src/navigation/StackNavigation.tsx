@@ -4,6 +4,7 @@ import TabNavigation from './TabNavigation';
 import LandingScreen from '../screen/LandingScreen/LandingScreen';
 import RegisterScreen from '../screen/RegisterScreen/RegisterScreen';
 import AccountSection from '../screen/ProfileScreen/AccountSection';
+import TermsScreen from '../screen/ProfileScreen/TermsScreen';
 
 const Stack = createStackNavigator();
 
@@ -30,6 +31,21 @@ const StackNavigation = () => {
         component={AccountSection}
         options={{
           title: 'Account',
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: '#201c5c',
+          },
+          headerTintColor: '#ffffff',
+          headerTitleStyle: {
+            fontFamily: 'Montserrat-Bold',
+          },
+        }}
+      />
+      <Stack.Screen
+        name="Terms"
+        component={TermsScreen}
+        options={{
+          title: 'Terms & Policies',
           headerShown: true,
           headerStyle: {
             backgroundColor: '#201c5c',

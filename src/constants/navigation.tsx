@@ -9,6 +9,7 @@ export type RootStackParamList = {
   NewTransaction: undefined;
   CashFlow: { shouldRefresh?: boolean } | undefined;
   Account: undefined;
+  Terms: undefined;
 };
 
 export type CashFlowStackParamList = {
