@@ -23,14 +23,6 @@ const LandingScreen: React.FC<LandingProps> = ({ navigation }) => {
               buttonStyle={styles.primaryButton}
               textStyle={styles.primaryButtonText}
             />
-            <TouchableOpacity
-              style={styles.secondaryButton}
-              onPress={() => navigation.navigate('Login')}
-              activeOpacity={0.7}>
-              <Text style={styles.secondaryButtonText}>
-                I already have an account
-              </Text>
-            </TouchableOpacity>
           </View>
         </View>
       </ImageBackground>
