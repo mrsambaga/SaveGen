@@ -1,23 +1,24 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  Alert,
-  Linking,
   Modal,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import Clipboard from '@react-native-clipboard/clipboard';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import {
+  faCheck,
+  faCopy,
   faEnvelope,
-  faPaperPlane,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 
 const SUPPORT_EMAIL = 'save-gen@gmail.com';
 const PRIMARY = '#201c5c';
 const MUTED = '#8B8AA3';
+const SUCCESS = '#22a06b';
 
 type ContactSupportModalProps = {
   visible: boolean;
@@ -28,27 +29,24 @@ const ContactSupportModal: React.FC<ContactSupportModalProps> = ({
   visible,
   onClose,
 }) => {
-  const handleOpenEmail = async () => {
-    const url = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
-      'SaveGen Support Request',
-    )}`;
-    try {
-      const supported = await Linking.canOpenURL(url);
-      if (!supported) {
-        Alert.alert(
-          'No email app found',
-          `Please send your message to ${SUPPORT_EMAIL}.`,
-        );
-        return;
-      }
-      await Linking.openURL(url);
-      onClose();
-    } catch {
-      Alert.alert(
-        'Something went wrong',
-        `Please send your message to ${SUPPORT_EMAIL}.`,
-      );
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!visible) {
+      setCopied(false);
+      return;
     }
+  }, [visible]);
+
+  useEffect(() => {
+    if (!copied) return;
+    const timeout = setTimeout(() => setCopied(false), 2000);
+    return () => clearTimeout(timeout);
+  }, [copied]);
+
+  const handleCopy = () => {
+    Clipboard.setString(SUPPORT_EMAIL);
+    setCopied(true);
   };
 
   return (
@@ -72,24 +70,43 @@ const ContactSupportModal: React.FC<ContactSupportModalProps> = ({
 
           <Text style={styles.title}>Contact Support</Text>
           <Text style={styles.subtitle}>
-            Have a question or need help? Reach out to our team and we'll get
-            back to you as soon as possible.
+            Have a question or need help? Send us an email and we'll get back
+            to you as soon as possible.
           </Text>
 
-          <View style={styles.emailBox}>
-            <Text style={styles.emailLabel}>Email</Text>
-            <Text style={styles.emailValue} selectable>
-              {SUPPORT_EMAIL}
-            </Text>
-          </View>
-
           <TouchableOpacity
-            style={styles.primaryButton}
-            onPress={handleOpenEmail}
-            activeOpacity={0.85}>
-            <FontAwesomeIcon icon={faPaperPlane} size={14} color="#fff" />
-            <Text style={styles.primaryButtonText}>Open Email App</Text>
+            style={styles.emailBox}
+            onPress={handleCopy}
+            activeOpacity={0.7}>
+            <View style={styles.emailBoxText}>
+              <Text style={styles.emailLabel}>Email</Text>
+              <Text style={styles.emailValue} selectable numberOfLines={1}>
+                {SUPPORT_EMAIL}
+              </Text>
+            </View>
+            <View
+              style={[
+                styles.copyButton,
+                copied && styles.copyButtonSuccess,
+              ]}>
+              <FontAwesomeIcon
+                icon={copied ? faCheck : faCopy}
+                size={14}
+                color={copied ? SUCCESS : PRIMARY}
+              />
+              <Text
+                style={[
+                  styles.copyButtonText,
+                  copied && styles.copyButtonTextSuccess,
+                ]}>
+                {copied ? 'Copied' : 'Copy'}
+              </Text>
+            </View>
           </TouchableOpacity>
+
+          <Text style={styles.helperText}>
+            Tap the email or the copy button to copy it to your clipboard.
+          </Text>
         </View>
       </View>
     </Modal>
@@ -154,11 +171,16 @@ const styles = StyleSheet.create({
   },
   emailBox: {
     width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#F5F4FB',
     borderRadius: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    marginBottom: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    gap: 12,
+  },
+  emailBoxText: {
+    flex: 1,
   },
   emailLabel: {
     fontSize: 11,
@@ -169,24 +191,40 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   emailValue: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: 'Montserrat-Bold',
     color: PRIMARY,
   },
-  primaryButton: {
+  copyButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: PRIMARY,
-    paddingVertical: 14,
-    borderRadius: 12,
-    width: '100%',
-    gap: 10,
+    gap: 6,
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#ECEAF5',
   },
-  primaryButtonText: {
-    fontSize: 15,
-    color: '#fff',
+  copyButtonSuccess: {
+    borderColor: SUCCESS,
+    backgroundColor: '#E8F7F0',
+  },
+  copyButtonText: {
+    fontSize: 13,
     fontFamily: 'Montserrat-SemiBold',
+    color: PRIMARY,
+  },
+  copyButtonTextSuccess: {
+    color: SUCCESS,
+  },
+  helperText: {
+    marginTop: 14,
+    fontSize: 12,
+    fontFamily: 'Montserrat-SemiBold',
+    color: MUTED,
+    textAlign: 'center',
+    lineHeight: 16,
   },
 });
 
