@@ -35,11 +35,11 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 const generateGuestCredentials = () => {
-  const id = String(uuid.v4()).replace(/-/g, '');
-  const email = `guest_${id}@savegen.local`;
-  const password =
-    String(uuid.v4()).replace(/-/g, '') +
-    String(uuid.v4()).replace(/-/g, '');
+  // 10 hex chars (~1.1 trillion combinations) is plenty for guest uniqueness
+  // and keeps the email short.
+  const id = String(uuid.v4()).replace(/-/g, '').slice(0, 10);
+  const email = `g_${id}@savegen.local`;
+  const password = String(uuid.v4()).replace(/-/g, '');
   return { email, password };
 };
 
