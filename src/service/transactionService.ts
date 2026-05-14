@@ -8,14 +8,9 @@ import {
 import { path } from '../constants/path';
 import { apiClient } from './apiClient';
 
-export const fetchTransactions = async (
-  userId: number = 1,
-): Promise<Transaction[]> => {
+export const fetchTransactions = async (): Promise<Transaction[]> => {
   try {
-    const response = await apiClient.get<GetTransactionDTO>(path.GET_TRANSACTIONS, {
-      params: { user_id: userId },
-    });
-
+    const response = await apiClient.get<GetTransactionDTO>(path.GET_TRANSACTIONS);
     return response.data.data;
   } catch (error) {
     if (error instanceof AxiosError) {

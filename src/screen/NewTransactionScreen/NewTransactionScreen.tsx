@@ -77,7 +77,6 @@ const NewTransactionScreen: React.FC<NewTransactionProps> = ({navigation}) => {
     try {
       setIsLoading(true);
       const requestDTO: CreateTransactionRequestDTO = {
-        user_id: 1,
         amount: parsed,
         date: date.toISOString(),
         detail: description,

@@ -13,7 +13,6 @@ export type CreateTransactionResponseDTO = {
 };
 
 export type CreateTransactionRequestDTO = {
-  user_id: number;
   amount: number;
   date: string;
   detail: string;

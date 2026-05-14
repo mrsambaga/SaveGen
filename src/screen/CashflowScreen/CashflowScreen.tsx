@@ -23,7 +23,7 @@ const CashflowScreen: React.FC<CashflowProps> = ({ navigation, route }) => {
   const getTransactions = useCallback(async () => {
     try {
       setIsLoading(true);
-      const fetchedTransactions = await fetchTransactions(1);
+      const fetchedTransactions = await fetchTransactions();
       setTransactions(fetchedTransactions);
     } catch (error) {
       console.error('Error fetching transactions:', error);
