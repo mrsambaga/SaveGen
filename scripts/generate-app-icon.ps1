@@ -17,14 +17,27 @@ function Resize-Png {
     param(
         [System.Drawing.Image]$Source,
         [int]$Size,
-        [string]$OutPath
+        [string]$OutPath,
+        [switch]$Circular
     )
     $bmp = New-Object System.Drawing.Bitmap $Size, $Size
     $g = [System.Drawing.Graphics]::FromImage($bmp)
     $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
     $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
     $g.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
-    $g.DrawImage($Source, 0, 0, $Size, $Size)
+
+    if ($Circular) {
+        # Inset slightly so anti-aliasing produces clean edges (no fringing).
+        $inset = 0.5
+        $path = New-Object System.Drawing.Drawing2D.GraphicsPath
+        $path.AddEllipse($inset, $inset, $Size - 2 * $inset, $Size - 2 * $inset)
+        $g.SetClip($path)
+        $g.DrawImage($Source, 0, 0, $Size, $Size)
+        $path.Dispose()
+    } else {
+        $g.DrawImage($Source, 0, 0, $Size, $Size)
+    }
+
     $g.Dispose()
     $dir = Split-Path -Parent $OutPath
     if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Force -Path $dir | Out-Null }
@@ -45,12 +58,12 @@ $android = @{
     'mipmap-xxxhdpi'  = 192
 }
 
-Write-Host "`nAndroid launcher icons" -ForegroundColor Yellow
+Write-Host "`nAndroid launcher icons (circular)" -ForegroundColor Yellow
 foreach ($folder in $android.Keys) {
     $size = $android[$folder]
     $dir = Join-Path $repoRoot "android\app\src\main\res\$folder"
-    Resize-Png -Source $master -Size $size -OutPath (Join-Path $dir 'ic_launcher.png')
-    Resize-Png -Source $master -Size $size -OutPath (Join-Path $dir 'ic_launcher_round.png')
+    Resize-Png -Source $master -Size $size -OutPath (Join-Path $dir 'ic_launcher.png') -Circular
+    Resize-Png -Source $master -Size $size -OutPath (Join-Path $dir 'ic_launcher_round.png') -Circular
 }
 
 # iOS: per the AppIcon.appiconset Contents.json
